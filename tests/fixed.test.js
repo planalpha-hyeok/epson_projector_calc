@@ -81,3 +81,17 @@ test('고정 렌즈: 공식 확인 기종은 출처가 있고, 자료 없는 기
   noData.forEach((p) => assert.ok(p.noData && p.lens === null, p.id));
   assert.ok(noData.some((p) => p.id === 'EB-L690U') && noData.some((p) => p.id === 'EB-2250U'));
 });
+
+test('밝기·무게: 사양서 값 또는 "자료 없음"', () => {
+  PROJECTORS.forEach((p) => {
+    assert.ok(p.lm === '자료 없음' || /^\d{1,3}(,\d{3})* lm$/.test(p.lm), `${p.id} 밝기 ${p.lm}`);
+    assert.ok(p.wt === '자료 없음' || /^약 \d+(\.\d)? kg( \(.+\))?$/.test(p.wt), `${p.id} 무게 ${p.wt}`);
+    if (p.noData) assert.ok(p.lm === '자료 없음' && p.wt === '자료 없음', p.id);
+  });
+  // 사양서 대조 값 (원본과 달랐던 것)
+  assert.strictEqual(P('EB-PQ2220B').wt, '약 29.2 kg (렌즈 제외)');
+  assert.strictEqual(P('EB-PU2116W').wt, '약 24.3 kg (렌즈 제외)');
+  assert.strictEqual(P('EB-L530U').wt, '약 8.2 kg');
+  assert.strictEqual(P('EB-810E').wt, '약 12.5 kg');
+  assert.strictEqual(P('EB-L25000U').lm, '자료 없음');
+});

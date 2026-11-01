@@ -122,7 +122,7 @@
       src = `기본값 ${defLm.toLocaleString()} lm: ${c.light.items[0].model} 장착 시 (${c.light.source})`;
     } else {
       const n = Number(String(c.p.lm).replace(/[^0-9]/g, ''));
-      if (n > 0) { defLm = n; src = `기본값 ${n.toLocaleString()} lm: 본체 표기 밝기 (미검증)`; }
+      if (n > 0) { defLm = n; src = `기본값 ${n.toLocaleString()} lm: 본체 밝기 (엡손 사양서, Normal 모드)`; }
     }
     $('lumenInput').placeholder = defLm ? String(defLm) : '';
     const userLm = readNum('lumenInput');
