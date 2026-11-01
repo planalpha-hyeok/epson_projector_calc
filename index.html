@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Epson 투사거리 계산기 (비공식)</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>EPSON 투사거리 계산기 (비공식)</h1>
+    <p>엡손 공식 도구 아님 / 설치 전 반드시 해당 기종 매뉴얼로 최종 확인</p>
+  </header>
+
+  <div class="card">
+    <div class="card-title">1. 프로젝터 및 렌즈 선택</div>
+    <div class="field">
+      <label for="seriesSelect">제품군</label>
+      <select id="seriesSelect"></select>
+    </div>
+    <div class="field">
+      <label for="modelSearch">모델명 검색</label>
+      <input type="text" id="modelSearch" placeholder="예: L690U, 25000, PU2220, 2250, 770">
+    </div>
+    <div class="field">
+      <label for="projectorSelect">프로젝터 모델</label>
+      <select id="projectorSelect"></select>
+    </div>
+    <div class="field" id="lensField" style="display: none;">
+      <label for="lensSelect">장착 렌즈</label>
+      <select id="lensSelect"></select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">2. 스크린 크기 입력</div>
+    <div class="tab-group">
+      <button type="button" class="tab-btn active" id="tabInch">대각선 인치</button>
+      <button type="button" class="tab-btn" id="tabCustom">가로/세로 (mm)</button>
+    </div>
+
+    <div id="inchInputSection">
+      <div class="grid-2">
+        <div class="field">
+          <label for="screenRatio">스크린 종횡비</label>
+          <select id="screenRatio">
+            <option value="16:10">16:10</option>
+            <option value="16:9">16:9</option>
+            <option value="4:3">4:3</option>
+            <option value="21:9">21:9</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="inchInput">스크린 크기 (인치)</label>
+          <input type="number" id="inchInput" value="120" min="1" step="1">
+        </div>
+      </div>
+    </div>
+
+    <div id="customInputSection" style="display: none;">
+      <div class="grid-2">
+        <div class="field">
+          <label for="customWidth">스크린 가로 (mm)</label>
+          <input type="number" id="customWidth" value="2585" min="1" step="10">
+        </div>
+        <div class="field">
+          <label for="customHeight">스크린 세로 (mm)</label>
+          <input type="number" id="customHeight" value="1615" min="1" step="10">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">3. 장비 제원</div>
+    <div class="grid-2 mb">
+      <div class="info-box"><span>밝기 (미검증)</span><strong id="specLumens">-</strong></div>
+      <div class="info-box"><span>해상도 / 패널 비율</span><strong id="specRes">-</strong></div>
+      <div class="info-box"><span>무게 (미검증)</span><strong id="specWeight">-</strong></div>
+      <div class="info-box"><span>렌즈 방식</span><strong id="specLensType">-</strong></div>
+    </div>
+    <div class="info-box">
+      <span>적용 렌즈 / 투사비 / 시프트</span>
+      <strong id="specOptics" class="small">-</strong>
+    </div>
+    <p class="source" id="specSource"></p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">4. 투사거리 및 설치 치수</div>
+    <ul class="warn-box" id="warnBox"></ul>
+    <div class="grid-2 mb">
+      <div class="highlight-box"><span>최소 투사거리 (WIDE)</span><strong id="resDistMin">-</strong></div>
+      <div class="highlight-box"><span>최대 투사거리 (TELE)</span><strong id="resDistMax">-</strong></div>
+    </div>
+    <div class="grid-2 mb">
+      <div class="info-box"><span>스크린 가로</span><strong id="resWidth">-</strong></div>
+      <div class="info-box"><span>스크린 세로</span><strong id="resHeight">-</strong></div>
+    </div>
+    <div class="grid-2 mb">
+      <div class="info-box"><span>스크린 대각선</span><strong id="resDiagonal">-</strong></div>
+      <div class="info-box"><span>스크린 종횡비</span><strong id="resAspect">-</strong></div>
+    </div>
+    <div class="info-box mb"><span>패널 전체 투사 영상 크기 (거리 계산 기준)</span><strong id="resPanel">-</strong></div>
+    <div class="grid-2">
+      <div class="info-box"><span>수직 시프트 (+ 위)</span><strong id="resVShift">-</strong></div>
+      <div class="info-box"><span>수평 시프트 (+ 오른쪽)</span><strong id="resHShift">-</strong></div>
+    </div>
+    <ul class="note">
+      <li>거리 = 투사비 × 패널 영상 가로폭. 스크린 비율이 패널과 다르면 엡손 매뉴얼 표와 같은 방식(가로 또는 세로 맞춤)으로 계산합니다.</li>
+      <li>시프트 mm 는 패널 영상 높이/가로폭 × % 로 계산한 값입니다. 상하·좌우를 동시에 최대로 쓸 수 없으며, 실제 가능 범위는 매뉴얼의 시프트 범위도를 확인하세요.</li>
+      <li>계산값은 근사치입니다. 실제 설치 전 해당 기종 매뉴얼의 투사거리 표 또는 엡손 공식 계산기로 확인하세요.</li>
+    </ul>
+  </div>
+
+  <script src="js/data/lenses.js"></script>
+  <script src="js/data/projectors.js"></script>
+  <script src="js/calc.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
