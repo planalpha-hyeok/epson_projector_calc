@@ -1,0 +1,16 @@
+{
+  "name": "EPSON 투사거리 계산기",
+  "short_name": "투사거리",
+  "description": "엡손 프로젝터 투사거리·설치 높이·시프트 계산기 (비공식, 엡손 사양서 공식 기준)",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b4a9e",
+  "theme_color": "#0b4a9e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

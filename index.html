@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Epson 투사거리 계산기 (비공식)</title>
+  <meta name="theme-color" content="#0b4a9e">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="투사거리">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -16,6 +22,9 @@
     </div>
     <button type="button" class="theme-btn" id="themeBtn" aria-label="화면 테마 바꾸기">테마: 자동</button>
   </header>
+
+  <button type="button" class="btn install-btn" id="installBtn" hidden>📲 앱으로 설치 (홈 화면)</button>
+  <p class="install-hint" id="iosInstallHint" hidden>📲 아이폰: 사파리 아래 공유 버튼 → "홈 화면에 추가"를 누르면 앱처럼 쓸 수 있습니다.</p>
 
   <!-- 입력 -->
   <section class="card">
@@ -284,6 +293,7 @@
 </main>
 
   <script src="js/theme.js"></script>
+  <script src="js/pwa.js"></script>
   <script src="js/data/lenses.js"></script>
   <script src="js/data/projectors.js"></script>
   <script src="js/data/light_output.js"></script>

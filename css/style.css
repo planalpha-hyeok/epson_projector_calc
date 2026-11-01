@@ -62,6 +62,9 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .top p { font-size: 0.75rem; color: var(--muted); }
 .theme-btn { flex: none; height: 32px; padding: 0 10px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); color: var(--muted); font-size: 0.75rem; cursor: pointer; }
 
+.install-btn { width: 100%; }
+.install-hint { font-size: 0.8rem; color: var(--primary); background: var(--primary-soft); border-radius: 8px; padding: 8px 10px; }
+
 /* 카드 */
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
 
