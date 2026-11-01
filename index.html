@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Epson 투사거리 계산기 (비공식)</title>
-  <meta name="theme-color" content="#0b4a9e">
+  <meta name="theme-color" content="#f0f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121217" media="(prefers-color-scheme: dark)">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -16,9 +17,10 @@
 <main class="page">
 
   <header class="top">
-    <div>
-      <h1>EPSON 투사거리 계산기</h1>
-      <p>비공식 · 엡손 사양서 공식 기준 · 설치 전 매뉴얼로 최종 확인</p>
+    <img class="app-icon" src="icons/icon-192.png" alt="" width="40" height="40">
+    <div class="top-text">
+      <h1>투사거리 계산기</h1>
+      <p>EPSON · 사양서 공식 기준 · 비공식</p>
     </div>
     <button type="button" class="theme-btn" id="themeBtn" aria-label="화면 테마 바꾸기">테마: 자동</button>
   </header>
@@ -290,6 +292,7 @@
     </div>
   </details>
 
+  <footer class="foot">설치 전 해당 기종 매뉴얼로 최종 확인하세요<br>Developed by 김성혁 · (주)가이드삼정</footer>
 </main>
 
   <script src="js/theme.js"></script>
