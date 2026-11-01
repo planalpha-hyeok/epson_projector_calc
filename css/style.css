@@ -97,6 +97,7 @@ select:focus-visible, input:focus-visible, button:focus-visible, summary:focus-v
 .actions { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
 .btn { height: 42px; border: 1px solid var(--primary); border-radius: 8px; background: var(--primary); color: var(--on-primary); font: inherit; font-weight: 700; cursor: pointer; }
 .btn.ghost { background: transparent; color: var(--primary); }
+.copy-fallback { width: 100%; height: auto; padding: 8px; font: inherit; font-size: 0.8rem; color: var(--text); background: var(--sunken); border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
 
 /* 주의 */
 .warn { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 8px; color: var(--warn); font-size: 0.8rem; }

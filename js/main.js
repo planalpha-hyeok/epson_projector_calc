@@ -295,9 +295,18 @@
       ui.setCopyStatus(p && p.noData ? '공식 자료가 없는 기종이라 복사할 결과가 없습니다.' : '복사할 결과가 없습니다. 입력값을 확인하세요.');
       return;
     }
+    const box = $('copyFallback');
+    box.hidden = true;
     copyText(state.lastReport)
       .then(() => ui.setCopyStatus('복사했습니다. 메신저나 메모에 붙여넣기 하세요.'))
-      .catch(() => ui.setCopyStatus('복사에 실패했습니다. 브라우저 권한을 확인하세요.'));
+      .catch(() => {
+        // 브라우저가 자동 복사를 막은 경우 (http 주소 등): 텍스트를 보여주고 선택해 둠
+        box.value = state.lastReport;
+        box.hidden = false;
+        box.focus();
+        box.select();
+        ui.setCopyStatus('자동 복사가 막혀 있습니다. 아래 글을 길게 눌러(또는 Ctrl+C) 직접 복사하세요.');
+      });
   }
 
   function init() {
