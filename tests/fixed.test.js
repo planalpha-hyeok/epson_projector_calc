@@ -72,10 +72,12 @@ test('초단초점: 사양서 a 공식 비율별 재현, b 값', () => {
   near(o2.tele.c, 18.1842 * 100, 1, '805F 16:10 TELE c');
 });
 
-test('고정 렌즈: 공식 확인 기종은 출처가 있고, 미확인 기종은 표시됨', () => {
+test('고정 렌즈: 공식 확인 기종은 출처가 있고, 자료 없는 기종은 계산 수치가 없음', () => {
   const fixed = PROJECTORS.filter((p) => p.type === 'FIXED');
   fixed.filter((p) => p.verified).forEach((p) => assert.ok(p.source && /엡손 사양서/.test(p.source), p.id));
-  const unverified = fixed.filter((p) => !p.verified).map((p) => p.id);
-  assert.strictEqual(fixed.length - unverified.length, 22);
-  assert.ok(unverified.includes('EB-L690U') && unverified.includes('EB-2250U'));
+  const noData = fixed.filter((p) => !p.verified);
+  assert.strictEqual(fixed.length - noData.length, 22);
+  // 공식 자료가 없는 기종은 광학 수치를 갖지 않음
+  noData.forEach((p) => assert.ok(p.noData && p.lens === null, p.id));
+  assert.ok(noData.some((p) => p.id === 'EB-L690U') && noData.some((p) => p.id === 'EB-2250U'));
 });

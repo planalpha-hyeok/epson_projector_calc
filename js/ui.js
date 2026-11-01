@@ -72,6 +72,17 @@
     $('specSource').textContent = lines.join('\n');
   }
 
+  /** 공식 자료가 없는 기종: 제원만 표시하고 광학 정보는 "자료 없음" */
+  function renderNoData(p) {
+    $('specLumens').textContent = p.lm;
+    $('specRes').textContent = `${p.res} (패널 ${p.nativeAspect})`;
+    $('specWeight').textContent = p.wt;
+    $('specLensType').innerHTML = '<span class="badge badge-fixed">고정 렌즈형</span>';
+    $('specOptics').textContent = '공식 자료 없음';
+    $('specLight').textContent = '공식 자료 없음';
+    $('specSource').textContent = '엡손 공식 사양서를 찾지 못한 기종입니다. 투사거리·시프트·설치 높이를 계산하지 않습니다.';
+  }
+
   function renderWarnings(list) {
     const box = $('warnBox');
     box.innerHTML = '';
@@ -218,6 +229,6 @@
   root.EPC.ui = {
     $, renderSeries, renderProjectorList, renderLensList, renderSpecs,
     renderWarnings, renderResult, renderReverse, clearResult, renderInstall,
-    setUnitLabels, setMode, setCopyStatus, renderLight, renderDiagrams, renderMatches, renderUst
+    setUnitLabels, setMode, setCopyStatus, renderLight, renderDiagrams, renderMatches, renderUst, renderNoData
   };
 })(window);

@@ -9,6 +9,7 @@
 
   /** 본체에서 쓸 수 있는 렌즈 목록 */
   function lensesFor(p, lensClasses) {
+    if (p.noData) return [];
     if (p.type === 'FIXED') return [p.lens];
     const cls = lensClasses[p.lensClass];
     const hideShift = (cls.shiftUnknownFor || []).includes(p.id);

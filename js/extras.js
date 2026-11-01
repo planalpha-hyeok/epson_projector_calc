@@ -162,5 +162,12 @@
   const OTHER_INPUTS = ['blendCols', 'blendRows', 'blendOverlap', 'lumenInput', 'gainInput', 'ambientInput'];
 
   root.EPC = root.EPC || {};
-  root.EPC.extras = { update, keystoneFor, LENGTH_INPUTS, OTHER_INPUTS };
+  /** 모든 결과 칸에 같은 문구 표시 (공식 자료 없는 기종 등) */
+  function clear(text) {
+    ['placeV', 'placeH', 'briLux', 'briContrast', 'briLevel'].forEach((id) => setState(id, text, ''));
+    ['blendPanel', 'blendWidth', 'blendDist', 'blendCanvas'].forEach((id) => { $(id).textContent = text; });
+    $('lumenSource').textContent = '';
+  }
+
+  root.EPC.extras = { update, clear, keystoneFor, LENGTH_INPUTS, OTHER_INPUTS };
 })(window);

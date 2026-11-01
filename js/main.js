@@ -164,9 +164,25 @@
     ui.renderMatches(shown, msg, state.unit);
   }
 
+  /** 공식 자료가 없는 기종: 모든 계산 칸을 비우고 "자료 없음" 표시 */
+  function showNoData(p) {
+    const msg = '공식 자료 없음';
+    ui.renderNoData(p);
+    ui.clearResult();
+    ui.renderWarnings([`[자료 없음] ${p.note}`]);
+    ui.renderUst(null, state.unit);
+    ui.renderInstall(null, msg, $('mountSelect').value, null, state.unit);
+    ui.renderDiagrams(null, null, '공식 자료가 없는 기종이라 그리지 않습니다.');
+    ui.renderMatches([], '공식 자료가 없는 기종은 비교할 수 없습니다.', state.unit);
+    extras.clear(msg);
+    state.lastReport = '';
+  }
+
   function update() {
     const p = currentProjector();
     if (!p) { ui.clearResult(); ui.renderWarnings([]); state.lastReport = ''; return; }
+
+    if (p.noData) { showNoData(p); return; }
 
     const lens = currentLens(p);
     const cls = p.type === 'FIXED' ? null : LENS_CLASSES[p.lensClass];
@@ -274,7 +290,11 @@
   }
 
   function onCopy() {
-    if (!state.lastReport) { ui.setCopyStatus('복사할 결과가 없습니다. 입력값을 확인하세요.'); return; }
+    if (!state.lastReport) {
+      const p = currentProjector();
+      ui.setCopyStatus(p && p.noData ? '공식 자료가 없는 기종이라 복사할 결과가 없습니다.' : '복사할 결과가 없습니다. 입력값을 확인하세요.');
+      return;
+    }
     copyText(state.lastReport)
       .then(() => ui.setCopyStatus('복사했습니다. 메신저나 메모에 붙여넣기 하세요.'))
       .catch(() => ui.setCopyStatus('복사에 실패했습니다. 브라우저 권한을 확인하세요.'));

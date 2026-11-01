@@ -3,8 +3,8 @@
  *
  * 교체형(INTERCHANGEABLE): lensClass 로 js/data/lenses.js 의 패널 등급을 지정.
  *   - 모든 교체형 본체는 엡손 공식 사양서/매뉴얼로 렌즈 공식을 확인함 (lenses.js source 참고).
- * 고정형(FIXED): 내장 렌즈 투사비/시프트를 직접 기록.
- *   - 원본 파일 값이며 공식 자료와 대조하지 않음 (verified: false).
+ * 고정형(FIXED): 내장 렌즈 거리 공식/시프트를 직접 기록 (fv, 엡손 사양서로 확인).
+ *   - 공식 사양서를 찾지 못한 기종은 광학 수치 없이 등록하고 계산하지 않음 (fx, noData: true).
  *
  * 주의: 밝기/무게 등 일반 제원은 원본 파일 값을 그대로 옮긴 것이며 검증하지 않았다.
  */
@@ -22,13 +22,8 @@
     { id: 'FIXED_LAMP', label: '램프형 (EB-2250U, EB-2065 등)' }
   ];
 
-  const NOTE_FIXED = '내장 렌즈 투사비/시프트는 원본 파일 값이며 공식 자료와 대조하지 않음';
+  const NOTE_FIXED = '공식 사양서를 찾지 못해 투사거리·시프트를 계산하지 않습니다. 해당 기종 매뉴얼을 확인하세요.';
 
-  // 투사비(tr) → 거리 공식 계수 a (cm / 인치). 화면 대각선 1인치당 가로폭(cm) × 투사비
-  const aFromTr = (tr, aspectText) => {
-    const [w, h] = aspectText.split(':').map(Number);
-    return tr * 2.54 * w / Math.sqrt(w * w + h * h);
-  };
 
   // 교체형 본체 생성
   const ic = (id, series, lm, res, aspect, wt, lensClass, note) => ({
@@ -94,16 +89,10 @@
     ust: ust(2.8051, 6.1428, 16.2671, 19.6048, -62.67), source: SRC_735 };
   const O_810 = { wide: [0.37435, -2.13581], tele: [0.50538, -2.13581], shiftNote: '초단초점. 높이 관련 공식은 사양서에서 확인하지 못함', source: SRC_810 };
 
-  // 고정형 본체 생성 - 공식 자료 미대조 (vS/hS: 원본 파일의 ±% 값)
-  const fx = (id, model, series, lm, res, aspect, wt, trMin, trMax, vS, hS) => ({
+  // 고정형 본체 - 공식 사양서를 찾지 못한 기종. 광학 수치를 넣지 않고 계산하지 않는다 (noData).
+  const fx = (id, model, series, lm, res, aspect, wt) => ({
     id, model, series, lm, res, nativeAspect: aspect, wt, type: 'FIXED',
-    lens: {
-      id: 'BUILTIN', name: '내장 렌즈',
-      trText: trMin === trMax ? `${trMin}` : `${trMin} - ${trMax}`,
-      wide: { a: aFromTr(trMin, aspect), b: 0 }, tele: { a: aFromTr(trMax, aspect), b: 0 },
-      shift: { v: [-vS, vS], h: [-hS, hS] }
-    },
-    verified: false, note: NOTE_FIXED
+    lens: null, noData: true, verified: false, note: NOTE_FIXED
   });
 
   const PROJECTORS = [
@@ -160,25 +149,25 @@
     fv('EB-L770U', 'EB-L770U', 'FIXED_LASER', '7,000 lm', 'WUXGA (4KE)', '16:10', '8.4 kg', O_L770),
     fv('EB-L735U', 'EB-L735U', 'FIXED_LASER', '7,000 lm', 'WUXGA', '16:10', '8.4 kg', O_L735),
     fv('EB-L730U', 'EB-L730U', 'FIXED_LASER', '7,000 lm', 'WUXGA', '16:10', '8.4 kg', O_L735),
-    fx('EB-L695U', 'EB-L695U', 'FIXED_LASER', '6,500 lm', 'WUXGA', '16:10', '8.4 kg', 1.35, 2.20, 50, 20),
-    fx('EB-L690U', 'EB-L690U', 'FIXED_LASER', '6,500 lm', 'WUXGA', '16:10', '8.4 kg', 1.35, 2.20, 50, 20),
+    fx('EB-L695U', 'EB-L695U', 'FIXED_LASER', '6,500 lm', 'WUXGA', '16:10', '8.4 kg'),
+    fx('EB-L690U', 'EB-L690U', 'FIXED_LASER', '6,500 lm', 'WUXGA', '16:10', '8.4 kg'),
     fv('EB-L635SU', 'EB-L635SU (단초점)', 'FIXED_LASER', '6,000 lm', 'WUXGA', '16:10', '8.4 kg', O_SU),
     fv('EB-L630SU', 'EB-L630SU (단초점)', 'FIXED_LASER', '6,000 lm', 'WUXGA', '16:10', '8.4 kg', O_SU),
     fv('EB-L630U', 'EB-L630U', 'FIXED_LASER', '6,200 lm', 'WUXGA', '16:10', '8.4 kg', O_L735),
     fv('EB-L570U', 'EB-L570U', 'FIXED_LASER', '5,200 lm', 'WUXGA (4KE)', '16:10', '7.7 kg', O_L770),
     fv('EB-L530U', 'EB-L530U', 'FIXED_LASER', '5,200 lm', 'WUXGA', '16:10', '7.7 kg', O_L735),
     fv('EB-L520U', 'EB-L520U', 'FIXED_LASER', '5,200 lm', 'WUXGA', '16:10', '7.7 kg', O_L520),
-    fx('EB-L610U', 'EB-L610U', 'FIXED_LASER', '6,000 lm', 'WUXGA', '16:10', '8.5 kg', 1.35, 2.20, 50, 20),
-    fx('EB-L510U', 'EB-L510U', 'FIXED_LASER', '5,000 lm', 'WUXGA', '16:10', '8.5 kg', 1.35, 2.20, 50, 20),
-    fx('EB-L400U', 'EB-L400U', 'FIXED_LASER', '4,500 lm', 'WUXGA', '16:10', '7.8 kg', 1.35, 2.20, 0, 0),
+    fx('EB-L610U', 'EB-L610U', 'FIXED_LASER', '6,000 lm', 'WUXGA', '16:10', '8.5 kg'),
+    fx('EB-L510U', 'EB-L510U', 'FIXED_LASER', '5,000 lm', 'WUXGA', '16:10', '8.5 kg'),
+    fx('EB-L400U', 'EB-L400U', 'FIXED_LASER', '4,500 lm', 'WUXGA', '16:10', '7.8 kg'),
 
     // 소형 레이저 (일반 초점)
     fv('EB-L260F', 'EB-L260F', 'SMALL_LASER', '4,600 lm', 'Full HD', '16:9', '4.2 kg', O_L260F),
-    fx('EB-L255F', 'EB-L255F', 'SMALL_LASER', '4,500 lm', 'Full HD', '16:9', '4.2 kg', 1.32, 2.14, 0, 0),
-    fx('EB-L250F', 'EB-L250F', 'SMALL_LASER', '4,500 lm', 'Full HD', '16:9', '4.2 kg', 1.32, 2.14, 0, 0),
+    fx('EB-L255F', 'EB-L255F', 'SMALL_LASER', '4,500 lm', 'Full HD', '16:9', '4.2 kg'),
+    fx('EB-L250F', 'EB-L250F', 'SMALL_LASER', '4,500 lm', 'Full HD', '16:9', '4.2 kg'),
     fv('EB-L210W', 'EB-L210W', 'SMALL_LASER', '4,500 lm', 'WXGA', '16:10', '4.2 kg', O_L210W),
-    fx('EB-L200W', 'EB-L200W', 'SMALL_LASER', '4,200 lm', 'WXGA', '16:10', '4.1 kg', 1.38, 2.24, 0, 0),
-    fx('EB-L200F', 'EB-L200F', 'SMALL_LASER', '4,500 lm', 'Full HD', '16:9', '4.1 kg', 1.33, 2.16, 0, 0),
+    fx('EB-L200W', 'EB-L200W', 'SMALL_LASER', '4,200 lm', 'WXGA', '16:10', '4.1 kg'),
+    fx('EB-L200F', 'EB-L200F', 'SMALL_LASER', '4,500 lm', 'Full HD', '16:9', '4.1 kg'),
 
     // 초단초점 (UST)
     fv('EB-810E', 'EB-810E (초단초점 4KE)', 'UST', '5,000 lm', '4K (4KE)', '16:9', '12.3 kg', O_810),
@@ -194,20 +183,20 @@
     fv('EB-1485Fi', 'EB-1485Fi (전자칠판 UST)', 'UST', '5,000 lm', 'Full HD', '16:9', '9.3 kg', O_805),
 
     // 램프형
-    fx('EB-2265U', 'EB-2265U', 'FIXED_LAMP', '5,500 lm', 'WUXGA', '16:10', '4.7 kg', 1.38, 2.28, 0, 0),
-    fx('EB-2255U', 'EB-2255U', 'FIXED_LAMP', '5,000 lm', 'WUXGA', '16:10', '4.7 kg', 1.38, 2.28, 0, 0),
-    fx('EB-2250U', 'EB-2250U', 'FIXED_LAMP', '5,000 lm', 'WUXGA', '16:10', '4.6 kg', 1.38, 2.28, 0, 0),
-    fx('EB-2165W', 'EB-2165W', 'FIXED_LAMP', '5,500 lm', 'WXGA', '16:10', '4.6 kg', 1.38, 2.24, 0, 0),
-    fx('EB-2155W', 'EB-2155W', 'FIXED_LAMP', '5,000 lm', 'WXGA', '16:10', '4.3 kg', 1.38, 2.24, 0, 0),
-    fx('EB-2065', 'EB-2065', 'FIXED_LAMP', '5,500 lm', 'XGA', '4:3', '4.4 kg', 1.38, 2.24, 0, 0),
-    fx('EB-2055', 'EB-2055', 'FIXED_LAMP', '5,000 lm', 'XGA', '4:3', '4.3 kg', 1.38, 2.24, 0, 0),
-    fx('EB-2042', 'EB-2042', 'FIXED_LAMP', '4,400 lm', 'XGA', '4:3', '3.0 kg', 1.38, 2.24, 0, 0),
-    fx('EB-992F', 'EB-992F', 'FIXED_LAMP', '4,000 lm', 'Full HD', '16:9', '3.1 kg', 1.32, 2.14, 0, 0),
-    fx('EB-982W', 'EB-982W', 'FIXED_LAMP', '4,200 lm', 'WXGA', '16:10', '3.1 kg', 1.38, 2.24, 0, 0),
-    fx('EB-FH52', 'EB-FH52', 'FIXED_LAMP', '4,000 lm', 'Full HD', '16:9', '3.1 kg', 1.32, 2.14, 0, 0),
-    fx('EB-W51', 'EB-W51', 'FIXED_LAMP', '4,000 lm', 'WXGA', '16:10', '2.5 kg', 1.30, 1.56, 0, 0),
-    fx('EB-X51', 'EB-X51', 'FIXED_LAMP', '3,800 lm', 'XGA', '4:3', '2.5 kg', 1.48, 1.77, 0, 0),
-    fx('EB-E01', 'EB-E01', 'FIXED_LAMP', '3,300 lm', 'XGA', '4:3', '2.4 kg', 1.44, 1.44, 0, 0)
+    fx('EB-2265U', 'EB-2265U', 'FIXED_LAMP', '5,500 lm', 'WUXGA', '16:10', '4.7 kg'),
+    fx('EB-2255U', 'EB-2255U', 'FIXED_LAMP', '5,000 lm', 'WUXGA', '16:10', '4.7 kg'),
+    fx('EB-2250U', 'EB-2250U', 'FIXED_LAMP', '5,000 lm', 'WUXGA', '16:10', '4.6 kg'),
+    fx('EB-2165W', 'EB-2165W', 'FIXED_LAMP', '5,500 lm', 'WXGA', '16:10', '4.6 kg'),
+    fx('EB-2155W', 'EB-2155W', 'FIXED_LAMP', '5,000 lm', 'WXGA', '16:10', '4.3 kg'),
+    fx('EB-2065', 'EB-2065', 'FIXED_LAMP', '5,500 lm', 'XGA', '4:3', '4.4 kg'),
+    fx('EB-2055', 'EB-2055', 'FIXED_LAMP', '5,000 lm', 'XGA', '4:3', '4.3 kg'),
+    fx('EB-2042', 'EB-2042', 'FIXED_LAMP', '4,400 lm', 'XGA', '4:3', '3.0 kg'),
+    fx('EB-992F', 'EB-992F', 'FIXED_LAMP', '4,000 lm', 'Full HD', '16:9', '3.1 kg'),
+    fx('EB-982W', 'EB-982W', 'FIXED_LAMP', '4,200 lm', 'WXGA', '16:10', '3.1 kg'),
+    fx('EB-FH52', 'EB-FH52', 'FIXED_LAMP', '4,000 lm', 'Full HD', '16:9', '3.1 kg'),
+    fx('EB-W51', 'EB-W51', 'FIXED_LAMP', '4,000 lm', 'WXGA', '16:10', '2.5 kg'),
+    fx('EB-X51', 'EB-X51', 'FIXED_LAMP', '3,800 lm', 'XGA', '4:3', '2.5 kg'),
+    fx('EB-E01', 'EB-E01', 'FIXED_LAMP', '3,300 lm', 'XGA', '4:3', '2.4 kg')
   ];
 
   root.EPC = root.EPC || {};
