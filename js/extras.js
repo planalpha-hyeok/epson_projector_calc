@@ -50,7 +50,8 @@
     const ids = ['placeV', 'placeH'];
     const msg = (t) => ids.forEach((id) => setState(id, t, ''));
     if (!c.res || c.mode === 'DIST') return msg('스크린 크기 입력 모드에서 사용할 수 있습니다');
-    if (c.p.type === 'FIXED') return msg('고정 렌즈 기종은 오프셋 자료가 없어 계산하지 않습니다');
+    if (c.p.type === 'FIXED' && !c.p.verified) return msg('공식 자료로 확인하지 않은 고정 렌즈 기종은 계산하지 않습니다');
+    if (c.lens.ust) return msg('초단초점은 렌즈 시프트가 없어 계산하지 않습니다');
     const lensY = readLen('planLensY', c.unit, true);
     const lensX = readLen('planLensX', c.unit, true) || 0;
     if (c.inst.screenBottomMm === null) return msg('위의 "바닥 ~ 스크린 하단" 높이를 먼저 입력하세요');

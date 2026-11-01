@@ -36,7 +36,23 @@
     return r ? { min: r.min, max: r.max } : null;
   }
 
-  const api = { lensHeightRange, lensToScreenBottom };
+  /**
+   * 초단초점 사양서의 b, c 값 (mm). 사양서 그림 기준:
+   *   b = 프로젝터 기준점 ~ 스크린의 가까운 쪽 끝, c = ~ 먼 쪽 끝
+   * 사양서 공식은 패널 비율 화면 기준이므로, 스크린이 패널보다 납작하면(가로 맞춤) 남는 여백의 절반만큼 b 가 늘어난다.
+   * @param {object} ust      { b: [[k,c0] WIDE, [k,c0] TELE], c: ... }  (c 는 검증용으로 보관)
+   * @param {number} panelDiagInch  패널 영상 대각선(인치)
+   */
+  function ustOffsets(ust, panelDiagInch, panelHmm, screenHmm) {
+    const margin = (panelHmm - screenHmm) / 2;
+    const one = (i) => {
+      const b = ust.b[i][0] * panelDiagInch + ust.b[i][1] + margin;
+      return { b, c: b + screenHmm };
+    };
+    return { wide: one(0), tele: one(1) };
+  }
+
+  const api = { lensHeightRange, lensToScreenBottom, ustOffsets };
   root.EPC = root.EPC || {};
   root.EPC.install = api;
   if (typeof module !== 'undefined') module.exports = api;

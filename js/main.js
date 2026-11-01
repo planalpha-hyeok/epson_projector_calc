@@ -51,7 +51,7 @@
     return { w: w, h: h };
   }
 
-  function buildWarnings(p, res) {
+  function buildWarnings(p, lens, res) {
     const out = [];
     if (p.note) out.push(p.verified ? `[참고] ${p.note}` : `[미검증] ${p.note}`);
 
@@ -65,6 +65,7 @@
       }
     }
 
+    if (lens.zoomNote) out.push(`[줌] ${lens.zoomNote}`);
     if (p.series === 'UST') {
       out.push('[초단초점] 초단초점 기종은 거리 측정 기준점이 기종마다 다릅니다. 설치 전 해당 매뉴얼의 투사거리 표를 확인하세요.');
     }
@@ -82,13 +83,19 @@
       ui.renderInstall(null, '투사거리 입력 모드에서는 계산하지 않습니다', mount, ceilingMm, state.unit);
       return ctx;
     }
-    if (p.type === 'FIXED') {
-      // 고정 렌즈는 렌즈 중심과 영상 중심의 고정 오프셋 자료가 없어 높이를 계산하면 틀린 값이 나옴
-      ui.renderInstall(null, '고정 렌즈 기종은 오프셋 자료가 없어 계산하지 않습니다 (매뉴얼 확인)', mount, ceilingMm, state.unit);
+    ui.renderUst(null, state.unit);
+    if (!p.verified && p.type === 'FIXED') {
+      // 공식 자료로 대조하지 않은 고정 렌즈 기종은 오프셋 자료가 없어 높이를 계산하면 틀린 값이 나옴
+      ui.renderInstall(null, '공식 자료로 확인하지 않은 고정 렌즈 기종은 계산하지 않습니다 (매뉴얼 확인)', mount, ceilingMm, state.unit);
       return ctx;
     }
     if (!res) {
       ui.renderInstall(null, '-', mount, ceilingMm, state.unit);
+      return ctx;
+    }
+    if (lens.ust) {
+      ui.renderInstall(null, '초단초점은 렌즈 시프트가 없습니다. 아래 b, c 값을 사용하세요', mount, ceilingMm, state.unit);
+      ui.renderUst(install.ustOffsets(lens.ust, res.panel.diagInch, res.panel.h, res.screen.h), state.unit);
       return ctx;
     }
     const v = lens.shift ? lens.shift.v : null;
@@ -109,8 +116,12 @@
   function updateDiagrams(p, res, lens, inst) {
     if (state.mode === 'DIST') { ui.renderDiagrams(null, null, '투사거리 입력 모드에서는 그리지 않습니다.'); return; }
     if (!res) { ui.renderDiagrams(null, null, '화면 크기를 입력하세요.'); return; }
-    if (p.type === 'FIXED') {
-      ui.renderDiagrams(null, null, '고정 렌즈 기종은 렌즈 오프셋 자료가 없어 그리지 않습니다.');
+    if (p.type === 'FIXED' && !p.verified) {
+      ui.renderDiagrams(null, null, '공식 자료로 확인하지 않은 고정 렌즈 기종은 그리지 않습니다.');
+      return;
+    }
+    if (lens.ust) {
+      ui.renderDiagrams(null, null, '초단초점은 그림 대신 5번 카드의 b, c 값을 사용하세요.');
       return;
     }
     const hasFloor = inst.screenBottomMm !== null;
@@ -200,7 +211,7 @@
       updateMatches(screen);
     }
 
-    const warnings = buildWarnings(p, res);
+    const warnings = buildWarnings(p, lens, res);
     ui.renderWarnings(warnings);
     const inst = updateInstall(p, res, lens);
     updateDiagrams(p, res, lens, inst);

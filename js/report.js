@@ -7,6 +7,7 @@
   const pct = (r) => {
     if (!r) return '자료 없음';
     if (r[0] === 0 && r[1] === 0) return '없음';
+    if (r[0] === r[1]) return `고정 ${r[0]}% (시프트 없음)`;
     if (r[0] === -r[1]) return `±${r[1]}%`;
     return `${r[0]}% ~ ${r[1]}%`;
   };
@@ -23,7 +24,7 @@
     const L = [];
     L.push('[EPSON 투사거리 계산 결과 - 비공식 계산기]');
     L.push(`기종: ${c.p.model}`);
-    L.push(`렌즈: ${c.lens.name} (투사비 ${c.lens.trText}:1)`);
+    L.push(`렌즈: ${c.lens.name}${c.lens.trText ? ` (투사비 ${c.lens.trText}:1)` : ' (초단초점: 사양서 a 공식)'}`);
     const sh = c.lens.shift || {};
     L.push(`시프트: 상하 ${pct(sh.v)}, 좌우 ${pct(sh.h)}`);
     if (c.light) {

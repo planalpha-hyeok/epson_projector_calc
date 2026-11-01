@@ -60,3 +60,4 @@ select:focus, input:focus { border-color: var(--primary); }
   .card { break-inside: avoid; box-shadow: none; }
   .copy-btn, #copyStatus, .tab-group { display: none !important; }
 }
+[hidden] { display: none !important; }

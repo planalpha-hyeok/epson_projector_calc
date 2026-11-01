@@ -38,6 +38,7 @@
   function shiftPctText(range) {
     if (!range) return '자료 없음';
     if (range[0] === 0 && range[1] === 0) return '없음';
+    if (range[0] === range[1]) return `고정 ${fmtPct(range[0])}% (시프트 없음)`;
     if (range[0] === -range[1]) return `±${range[1]}%`;
     return `${fmtPct(range[0])}% ~ ${fmtPct(range[1])}%`;
   }
@@ -57,12 +58,16 @@
 
     const shift = lens.shift || { v: null, h: null };
     $('specOptics').textContent =
-      `${lens.name} / 투사비 ${lens.trText}:1 / 시프트 상하 ${shiftPctText(shift.v)}, 좌우 ${shiftPctText(shift.h)}`;
+      `${lens.name} / ${lens.trText ? `투사비 ${lens.trText}:1` : '투사비: 사양서 a 공식 사용 (초단초점)'} / 시프트 상하 ${shiftPctText(shift.v)}, 좌우 ${shiftPctText(shift.h)}`;
 
-    const lines = lensClass
-      ? [`패널 등급: ${lensClass.label}`, `출처: ${lensClass.source}`]
-      : ['출처: 원본 파일 값 (공식 자료와 대조하지 않음)'];
-    if (lensClass) lines.push(`거리 공식: Wide ${formulaText(lens.wide)} / Tele ${formulaText(lens.tele)} (인치 = 패널 영상 대각선)`);
+    let lines;
+    if (lensClass) lines = [`패널 등급: ${lensClass.label}`, `출처: ${lensClass.source}`];
+    else if (p.verified) lines = [`출처: ${p.source}`];
+    else lines = ['출처: 원본 파일 값 (공식 자료와 대조하지 않음)'];
+    if (lensClass || p.verified) {
+      lines.push(`거리 공식: Wide ${formulaText(lens.wide)} / Tele ${formulaText(lens.tele)} (인치 = 패널 영상 대각선)`);
+    }
+    if (lens.zoomNote) lines.push(`줌 참고: ${lens.zoomNote}`);
     if (lens.shiftNote) lines.push(`시프트 참고: ${lens.shiftNote}`);
     $('specSource').textContent = lines.join('\n');
   }
@@ -82,6 +87,7 @@
   function shiftMmText(rangeMm, rangePct, unit) {
     if (!rangePct) return '자료 없음';
     if (rangePct[0] === 0 && rangePct[1] === 0) return '없음';
+    if (rangePct[0] === rangePct[1]) return shiftPctText(rangePct);
     const [a, b] = rangeMm;
     if (Math.abs(a + b) < 0.5) return `±${U.format(b, unit)} (${shiftPctText(rangePct)})`;
     const sg = (v) => (v > 0 ? '+' : '');
@@ -144,6 +150,14 @@
     }
   }
 
+  /** 초단초점 b, c 값 (null 이면 숨김) */
+  function renderUst(o, unit) {
+    $('hUstBox').hidden = !o;
+    if (!o) return;
+    const f = (mm) => U.format(mm, unit);
+    $('hUst').textContent = `WIDE: b ${f(o.wide.b)}, c ${f(o.wide.c)} / TELE: b ${f(o.tele.b)}, c ${f(o.tele.c)}`;
+  }
+
   function setUnitLabels(unit) {
     document.querySelectorAll('.unit-label').forEach((el) => { el.textContent = U.LABEL[unit]; });
   }
@@ -204,6 +218,6 @@
   root.EPC.ui = {
     $, renderSeries, renderProjectorList, renderLensList, renderSpecs,
     renderWarnings, renderResult, renderReverse, clearResult, renderInstall,
-    setUnitLabels, setMode, setCopyStatus, renderLight, renderDiagrams, renderMatches
+    setUnitLabels, setMode, setCopyStatus, renderLight, renderDiagrams, renderMatches, renderUst
   };
 })(window);
