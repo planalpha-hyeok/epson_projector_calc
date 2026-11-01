@@ -47,6 +47,7 @@
         }
       }
     }
+    (c.extraLines || []).forEach((x) => L.push(x));
     (c.warnings || []).forEach((w) => L.push(`* ${w}`));
     L.push('※ 근사치입니다. 설치 전 해당 기종 매뉴얼로 최종 확인하세요.');
     return L.join('\n');

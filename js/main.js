@@ -2,11 +2,12 @@
  * 진입점: 상태 관리 + 이벤트 연결
  */
 (function (root) {
-  const { LENS_CLASSES, SERIES, PROJECTORS, LIGHT_OUTPUT, calc, catalog, install, match, diagram, units, report, ui } = root.EPC;
+  const { LENS_CLASSES, SERIES, PROJECTORS, LIGHT_OUTPUT, calc, catalog, install, match, diagram, units, report, ui, extras } = root.EPC;
   const $ = ui.$;
 
   // 선택 단위로 입력받는 칸 (단위 변경 시 값을 환산해 유지)
-  const LENGTH_INPUTS = ['customWidth', 'customHeight', 'distInput', 'screenBottomInput', 'ceilingInput', 'matchDistInput'];
+  const LENGTH_INPUTS = ['customWidth', 'customHeight', 'distInput', 'screenBottomInput', 'ceilingInput', 'matchDistInput',
+    ...extras.LENGTH_INPUTS];
   const MATCH_LIMIT = 60;
 
   const state = {
@@ -177,6 +178,7 @@
         updateInstall(p, null, lens);
         updateDiagrams(p, null, lens, null);
         updateMatches(null);
+        extras.update({ p, lens, res: null, mode: state.mode, unit: state.unit, inst: { screenBottomMm: null }, light });
         state.lastReport = '';
         return;
       }
@@ -189,6 +191,7 @@
         updateInstall(p, null, lens);
         updateDiagrams(p, null, lens, null);
         updateMatches(null);
+        extras.update({ p, lens, res: null, mode: state.mode, unit: state.unit, inst: { screenBottomMm: null }, light });
         state.lastReport = '';
         return;
       }
@@ -202,7 +205,8 @@
     const inst = updateInstall(p, res, lens);
     updateDiagrams(p, res, lens, inst);
     if (state.mode === 'DIST') updateMatches(null);
-    state.lastReport = report.build(Object.assign(base, inst, { res, rev, distMm, warnings }));
+    const extraLines = extras.update({ p, lens, res, mode: state.mode, unit: state.unit, inst, light });
+    state.lastReport = report.build(Object.assign(base, inst, { res, rev, distMm, warnings, extraLines }));
   }
 
   function onProjectorChange() {
@@ -233,8 +237,9 @@
   function onUnitChange() {
     const next = $('unitSelect').value;
     LENGTH_INPUTS.forEach((id) => {
-      const mm = readLengthMm(id);
-      if (mm !== null) $(id).value = units.inputValue(mm, next);
+      const raw = $(id).value.trim();
+      const v = Number(raw);
+      if (raw !== '' && isFinite(v)) $(id).value = units.inputValue(units.toMm(v, state.unit), next);
     });
     state.unit = next;
     ui.setUnitLabels(next);
@@ -278,6 +283,8 @@
     $('tabCustom').addEventListener('click', () => setMode('CUSTOM'));
     $('tabDist').addEventListener('click', () => setMode('DIST'));
     $('copyBtn').addEventListener('click', onCopy);
+    $('printBtn').addEventListener('click', () => root.print());
+    extras.OTHER_INPUTS.forEach((id) => $(id).addEventListener('input', update));
     state.unit = $('unitSelect').value;
     ui.setUnitLabels(state.unit);
     onFilterChange();

@@ -49,3 +49,14 @@ select:focus, input:focus { border-color: var(--primary); }
 .match-list { list-style: none; margin-top: 8px; }
 .match-list li { font-size: 0.8rem; padding: 6px 8px; border-bottom: 1px solid #ebeef5; }
 .match-list li .tag { font-size: 0.7rem; color: #b88230; margin-left: 4px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.sub-title { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin: 14px 0 8px; padding-top: 10px; border-top: 1px dashed var(--border); }
+.copy-btn.secondary { margin-top: 8px; background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+.state-ok { color: #2e7d32; }
+.state-warn { color: #b26a00; }
+.state-bad { color: var(--accent); }
+@media print {
+  body { max-width: none; padding: 0; background: #fff; }
+  .card { break-inside: avoid; box-shadow: none; }
+  .copy-btn, #copyStatus, .tab-group { display: none !important; }
+}
