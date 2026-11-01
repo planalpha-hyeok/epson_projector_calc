@@ -12,7 +12,8 @@
   const H = 320;
   const FONT = 17;
   const PAD = { l: 84, r: 24, t: 26, b: 52 };
-  const C = { screen: '#004098', panel: '#7a9cc6', region: '#d32f2f', beam: '#9aa3ad', line: '#555', text: '#333' };
+  // 색은 CSS 클래스(d-*)로 지정한다 (css/style.css 의 테마 토큰 사용, 다크 모드 대응)
+  const C = { screen: 'screen', panel: 'panel', region: 'region', beam: 'beam', line: 'line', text: 'text' };
 
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const n = (v) => Math.round(v * 10) / 10;
@@ -32,12 +33,13 @@
     };
   }
 
-  const line = (x1, y1, x2, y2, color, w, dash) =>
-    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash}"` : ''}/>`;
-  const rect = (x1, y1, x2, y2, stroke, fill, dash) =>
-    `<rect x="${Math.min(x1, x2)}" y="${Math.min(y1, y2)}" width="${n(Math.abs(x2 - x1))}" height="${n(Math.abs(y2 - y1))}" stroke="${stroke}" fill="${fill}" stroke-width="1.5"${dash ? ` stroke-dasharray="${dash}"` : ''}/>`;
-  const text = (x, y, s, anchor, color) =>
-    `<text x="${x}" y="${y}" font-size="${FONT}" fill="${color || C.text}" text-anchor="${anchor || 'start'}">${esc(s)}</text>`;
+  const line = (x1, y1, x2, y2, cls, w, dash) =>
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="d-${cls}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash}"` : ''}/>`;
+  // 채움색도 클래스로 지정 (두 번째 색 인자는 사용하지 않음, 호출부 호환용)
+  const rect = (x1, y1, x2, y2, cls, _fill, dash) =>
+    `<rect x="${Math.min(x1, x2)}" y="${Math.min(y1, y2)}" width="${n(Math.abs(x2 - x1))}" height="${n(Math.abs(y2 - y1))}" class="d-${cls}" stroke-width="1.5"${dash ? ` stroke-dasharray="${dash}"` : ''}/>`;
+  const text = (x, y, s, anchor, cls) =>
+    `<text x="${x}" y="${y}" font-size="${FONT}" class="d-${cls || C.text}" text-anchor="${anchor || 'start'}">${esc(s)}</text>`;
   const svg = (title, body) =>
     `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(title)}">${body}</svg>`;
 
@@ -85,7 +87,7 @@
     const xT = S.X(d.distTele);
     const xW = Math.abs(S.X(d.distWide) - xT) < 4 ? xT + 4 : S.X(d.distWide);
     if (hasLens) {
-      b += rect(xT, S.Y(lMax), xW, S.Y(lMin), C.region, 'rgba(211,47,47,0.15)');
+      b += rect(xT, S.Y(lMax), xW, S.Y(lMin), C.region, null);
       if (d.hasFloor) {
         b += text(S.X(d.distTele) - 4, S.Y(lMax) + 4, f(lMax), 'end', C.region);
         b += text(S.X(d.distTele) - 4, S.Y(lMin) + 4, f(lMin), 'end', C.region);
@@ -129,11 +131,11 @@
     let b = '';
     if (d.hasFloor) b += line(S.X(-xHalf), S.Y(0), S.X(xHalf), S.Y(0), C.line, 1.5) + text(S.X(-xHalf), S.Y(0) + FONT + 2, '바닥');
     b += rect(S.X(-d.panelW / 2), S.Y(center + d.panelH / 2), S.X(d.panelW / 2), S.Y(center - d.panelH / 2), C.panel, 'none', '4 3');
-    b += rect(S.X(-d.screenW / 2), S.Y(d.screenBottom + d.screenH), S.X(d.screenW / 2), S.Y(d.screenBottom), C.screen, 'rgba(0,64,152,0.08)');
+    b += rect(S.X(-d.screenW / 2), S.Y(d.screenBottom + d.screenH), S.X(d.screenW / 2), S.Y(d.screenBottom), C.screen, null);
 
     if (hasLensY) {
       if (d.hRangePct) {
-        b += rect(S.X(xr[0]), S.Y(d.lensYMax), S.X(xr[1]), S.Y(d.lensYMin), C.region, 'rgba(211,47,47,0.15)');
+        b += rect(S.X(xr[0]), S.Y(d.lensYMax), S.X(xr[1]), S.Y(d.lensYMin), C.region, null);
         b += text(S.X(xr[1]) + 4, S.Y(d.lensYMin) + FONT, `좌우 ±${f(Math.max(Math.abs(xr[0]), Math.abs(xr[1])))}`, 'start', C.region);
       } else {
         b += line(S.X(0), S.Y(d.lensYMax), S.X(0), S.Y(d.lensYMin), C.region, 3);

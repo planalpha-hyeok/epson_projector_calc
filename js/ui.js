@@ -31,7 +31,7 @@
   }
 
   function renderLensList(lenses, show) {
-    $('lensField').style.display = show ? 'block' : 'none';
+    $('lensField').style.display = show ? '' : 'none';
     if (show) fillSelect($('lensSelect'), lenses, (l) => l.id, (l) => l.name);
   }
 
@@ -83,6 +83,7 @@
     $('specSource').textContent = '엡손 공식 사양서를 찾지 못한 기종입니다. 투사거리·시프트·설치 높이를 계산하지 않습니다.';
   }
 
+  /** 주의 사항: 평소에는 "주의 N건"만 보이고, 누르면 펼쳐짐 */
   function renderWarnings(list) {
     const box = $('warnBox');
     box.innerHTML = '';
@@ -91,7 +92,10 @@
       li.textContent = msg;
       box.appendChild(li);
     });
-    box.style.display = list.length ? 'block' : 'none';
+    $('warnDetails').hidden = !list.length;
+    // 첫 항목의 [분류]만 요약에 보여줌
+    const tags = list.map((m) => (m.match(/^\[([^\]]+)\]/) || [])[1]).filter(Boolean);
+    $('warnSummary').textContent = `주의 ${list.length}건${tags.length ? `: ${Array.from(new Set(tags)).join(', ')}` : ''}`;
   }
 
   // 부호: 수직은 + 가 위, 수평은 + 가 오른쪽
@@ -146,7 +150,7 @@
    * @param {string} msg     h 가 없을 때 표시할 문구
    */
   function renderInstall(h, msg, mount, ceilingMm, unit) {
-    $('ceilingField').style.display = mount === 'CEILING' ? 'block' : 'none';
+    $('ceilingField').style.display = mount === 'CEILING' ? '' : 'none';
     const showCeil = mount === 'CEILING' && h && ceilingMm > 0;
     $('hCeilingBox').style.display = showCeil ? 'block' : 'none';
     if (!h) {
@@ -177,10 +181,11 @@
     $('tabInch').classList.toggle('active', mode === 'INCH');
     $('tabCustom').classList.toggle('active', mode === 'CUSTOM');
     $('tabDist').classList.toggle('active', mode === 'DIST');
-    $('inchInputSection').style.display = mode === 'INCH' ? 'block' : 'none';
-    $('customInputSection').style.display = mode === 'CUSTOM' ? 'block' : 'none';
-    $('distInputSection').style.display = mode === 'DIST' ? 'block' : 'none';
-    $('ratioField').style.display = mode === 'CUSTOM' ? 'none' : 'block';
+    // display 값은 CSS(grid) 기본값을 쓰도록 '' 로 되돌림
+    $('inchInputSection').style.display = mode === 'INCH' ? '' : 'none';
+    $('customInputSection').style.display = mode === 'CUSTOM' ? '' : 'none';
+    $('distInputSection').style.display = mode === 'DIST' ? '' : 'none';
+    $('ratioField').style.display = mode === 'CUSTOM' ? 'none' : '';
   }
 
   function setCopyStatus(text) {

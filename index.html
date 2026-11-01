@@ -2,294 +2,287 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Epson 투사거리 계산기 (비공식)</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<main class="page">
 
-  <header>
-    <h1>EPSON 투사거리 계산기 (비공식)</h1>
-    <p>엡손 공식 도구 아님 / 설치 전 반드시 해당 기종 매뉴얼로 최종 확인</p>
+  <header class="top">
+    <div>
+      <h1>EPSON 투사거리 계산기</h1>
+      <p>비공식 · 엡손 사양서 공식 기준 · 설치 전 매뉴얼로 최종 확인</p>
+    </div>
+    <button type="button" class="theme-btn" id="themeBtn" aria-label="화면 테마 바꾸기">테마: 자동</button>
   </header>
 
-  <div class="card">
-    <div class="card-title">1. 프로젝터 및 렌즈 선택</div>
-    <div class="field">
-      <label for="seriesSelect">제품군</label>
-      <select id="seriesSelect"></select>
+  <!-- 입력 -->
+  <section class="card">
+    <div class="row-2">
+      <div class="field">
+        <label for="seriesSelect">제품군</label>
+        <select id="seriesSelect"></select>
+      </div>
+      <div class="field">
+        <label for="modelSearch">모델 검색</label>
+        <input type="text" id="modelSearch" placeholder="예: L735, PU2220, 805">
+      </div>
     </div>
     <div class="field">
-      <label for="modelSearch">모델명 검색</label>
-      <input type="text" id="modelSearch" placeholder="예: L690U, 25000, PU2220, 2250, 770">
-    </div>
-    <div class="field">
-      <label for="projectorSelect">프로젝터 모델</label>
+      <label for="projectorSelect">프로젝터</label>
       <select id="projectorSelect"></select>
     </div>
     <div class="field" id="lensField" style="display: none;">
-      <label for="lensSelect">장착 렌즈</label>
+      <label for="lensSelect">렌즈</label>
       <select id="lensSelect"></select>
     </div>
-  </div>
 
-  <div class="card">
-    <div class="card-title">2. 입력</div>
-    <div class="field">
-      <label for="unitSelect">길이 단위</label>
-      <select id="unitSelect">
+    <div class="tab-row">
+      <div class="tab-group" role="tablist">
+        <button type="button" class="tab-btn active" id="tabInch">인치</button>
+        <button type="button" class="tab-btn" id="tabCustom">가로×세로</button>
+        <button type="button" class="tab-btn" id="tabDist">거리→화면</button>
+      </div>
+      <select id="unitSelect" class="unit-select" aria-label="길이 단위">
         <option value="m">m</option>
         <option value="mm">mm</option>
-        <option value="ft">ft (피트)</option>
-      </select>
-    </div>
-    <div class="tab-group">
-      <button type="button" class="tab-btn active" id="tabInch">대각선 인치</button>
-      <button type="button" class="tab-btn" id="tabCustom">가로/세로</button>
-      <button type="button" class="tab-btn" id="tabDist">투사거리</button>
-    </div>
-
-    <div class="field" id="ratioField">
-      <label for="screenRatio">스크린 종횡비</label>
-      <select id="screenRatio">
-        <option value="16:10">16:10</option>
-        <option value="16:9">16:9</option>
-        <option value="4:3">4:3</option>
-        <option value="21:9">21:9</option>
+        <option value="ft">ft</option>
       </select>
     </div>
 
-    <div id="inchInputSection">
+    <div class="row-2">
+      <div class="field" id="ratioField">
+        <label for="screenRatio">화면 비율</label>
+        <select id="screenRatio">
+          <option value="16:10">16:10</option>
+          <option value="16:9">16:9</option>
+          <option value="4:3">4:3</option>
+          <option value="21:9">21:9</option>
+        </select>
+      </div>
+      <div class="field" id="inchInputSection">
+        <label for="inchInput">화면 크기 (인치)</label>
+        <input type="number" id="inchInput" value="120" min="1" step="1" inputmode="decimal">
+      </div>
+      <div class="field" id="distInputSection" style="display: none;">
+        <label for="distInput">투사거리 (<span class="unit-label">m</span>)</label>
+        <input type="number" id="distInput" value="5" min="0" step="any" inputmode="decimal">
+      </div>
+    </div>
+    <div class="row-2" id="customInputSection" style="display: none;">
       <div class="field">
-        <label for="inchInput">스크린 크기 (인치)</label>
-        <input type="number" id="inchInput" value="120" min="1" step="1">
+        <label for="customWidth">화면 가로 (<span class="unit-label">m</span>)</label>
+        <input type="number" id="customWidth" value="2.59" min="0" step="any" inputmode="decimal">
       </div>
-    </div>
-
-    <div id="customInputSection" style="display: none;">
-      <div class="grid-2">
-        <div class="field">
-          <label for="customWidth">스크린 가로 (<span class="unit-label">m</span>)</label>
-          <input type="number" id="customWidth" value="2.59" min="0" step="any">
-        </div>
-        <div class="field">
-          <label for="customHeight">스크린 세로 (<span class="unit-label">m</span>)</label>
-          <input type="number" id="customHeight" value="1.62" min="0" step="any">
-        </div>
-      </div>
-    </div>
-
-    <div id="distInputSection" style="display: none;">
       <div class="field">
-        <label for="distInput">렌즈 ~ 스크린 투사거리 (<span class="unit-label">m</span>)</label>
-        <input type="number" id="distInput" value="5" min="0" step="any">
+        <label for="customHeight">화면 세로 (<span class="unit-label">m</span>)</label>
+        <input type="number" id="customHeight" value="1.62" min="0" step="any" inputmode="decimal">
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
-    <div class="card-title">3. 장비 제원</div>
-    <div class="grid-2 mb">
-      <div class="info-box"><span>밝기 (Normal 모드, 사양서)</span><strong id="specLumens">-</strong></div>
-      <div class="info-box"><span>해상도 / 패널 비율</span><strong id="specRes">-</strong></div>
-      <div class="info-box"><span>무게 (사양서)</span><strong id="specWeight">-</strong></div>
-      <div class="info-box"><span>렌즈 방식</span><strong id="specLensType">-</strong></div>
-    </div>
-    <div class="info-box mb">
-      <span>적용 렌즈 / 투사비 / 시프트</span>
-      <strong id="specOptics" class="small">-</strong>
-    </div>
-    <div class="info-box">
-      <span>렌즈 장착 시 밝기 (엡손 사양서)</span>
-      <strong id="specLight" class="small">-</strong>
-    </div>
-    <p class="source" id="specSource"></p>
-  </div>
-
-  <div class="card">
-    <div class="card-title">4. 계산 결과</div>
-    <ul class="warn-box" id="warnBox"></ul>
+  <!-- 핵심 결과: 투사거리 -->
+  <section class="card result">
+    <details class="warn" id="warnDetails" hidden>
+      <summary id="warnSummary">주의</summary>
+      <ul class="warn-list" id="warnBox"></ul>
+    </details>
 
     <div id="normalResult">
-      <div class="grid-2 mb">
-        <div class="highlight-box"><span>최소 투사거리 (WIDE)</span><strong id="resDistMin">-</strong></div>
-        <div class="highlight-box"><span>최대 투사거리 (TELE)</span><strong id="resDistMax">-</strong></div>
+      <p class="result-label">투사거리 <span class="muted">(렌즈 ~ 스크린)</span></p>
+      <div class="hero">
+        <div><span class="hero-tag">WIDE</span><strong id="resDistMin">-</strong></div>
+        <span class="hero-sep">~</span>
+        <div><span class="hero-tag">TELE</span><strong id="resDistMax">-</strong></div>
       </div>
-      <div class="grid-2 mb">
-        <div class="info-box"><span>스크린 가로</span><strong id="resWidth">-</strong></div>
-        <div class="info-box"><span>스크린 세로</span><strong id="resHeight">-</strong></div>
-      </div>
-      <div class="grid-2 mb">
-        <div class="info-box"><span>스크린 대각선</span><strong id="resDiagonal">-</strong></div>
-        <div class="info-box"><span>스크린 종횡비</span><strong id="resAspect">-</strong></div>
-      </div>
-      <div class="info-box mb"><span>패널 전체 투사 영상 크기 (거리 계산 기준)</span><strong id="resPanel">-</strong></div>
-      <div class="grid-2">
-        <div class="info-box"><span>수직 시프트 (+ 위)</span><strong id="resVShift">-</strong></div>
-        <div class="info-box"><span>수평 시프트 (+ 오른쪽)</span><strong id="resHShift">-</strong></div>
-      </div>
+      <dl class="facts">
+        <div><dt>화면</dt><dd><span id="resWidth">-</span> × <span id="resHeight">-</span></dd></div>
+        <div><dt>대각선</dt><dd id="resDiagonal">-</dd></div>
+        <div><dt>비율</dt><dd id="resAspect">-</dd></div>
+        <div><dt>패널 영상</dt><dd id="resPanel">-</dd></div>
+        <div><dt>시프트 상하 (+위)</dt><dd id="resVShift">-</dd></div>
+        <div><dt>시프트 좌우 (+오른쪽)</dt><dd id="resHShift">-</dd></div>
+      </dl>
     </div>
 
     <div id="reverseResult" style="display: none;">
-      <div class="grid-2 mb">
-        <div class="highlight-box"><span>최대 화면 (WIDE)</span><strong id="revWideInch">-</strong></div>
-        <div class="highlight-box"><span>최소 화면 (TELE)</span><strong id="revTeleInch">-</strong></div>
+      <p class="result-label">이 거리에서 가능한 화면 크기</p>
+      <div class="hero">
+        <div><span class="hero-tag">TELE (최소)</span><strong id="revTeleInch">-</strong></div>
+        <span class="hero-sep">~</span>
+        <div><span class="hero-tag">WIDE (최대)</span><strong id="revWideInch">-</strong></div>
       </div>
-      <div class="grid-2">
-        <div class="info-box"><span>WIDE 스크린 가로 × 세로</span><strong id="revWideSize">-</strong></div>
-        <div class="info-box"><span>TELE 스크린 가로 × 세로</span><strong id="revTeleSize">-</strong></div>
-      </div>
+      <dl class="facts">
+        <div><dt>최소 화면</dt><dd id="revTeleSize">-</dd></div>
+        <div><dt>최대 화면</dt><dd id="revWideSize">-</dd></div>
+      </dl>
     </div>
 
-    <ul class="note">
-      <li>거리 = 엡손 사양서 공식 (a × 패널 영상 대각선 인치 + b). 스크린 비율이 패널과 다르면 엡손 사양서와 같은 방식(가로 또는 세로 맞춤)으로 계산합니다.</li>
-      <li>시프트 mm 는 패널 영상 높이/가로폭 × % 로 계산한 값입니다. 상하·좌우를 동시에 최대로 쓸 수 없습니다.</li>
-      <li>계산값은 근사치입니다. 실제 설치 전 해당 기종 매뉴얼로 확인하세요.</li>
-    </ul>
-  </div>
-
-  <div class="card">
-    <div class="card-title">5. 설치 높이</div>
-    <div class="grid-2">
-      <div class="field">
-        <label for="mountSelect">설치 방식</label>
-        <select id="mountSelect">
-          <option value="FLOOR">바닥/테이블</option>
-          <option value="CEILING">천장 설치(반전)</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="screenBottomInput">바닥 ~ 스크린 하단 (<span class="unit-label">m</span>)</label>
-        <input type="number" id="screenBottomInput" min="0" step="any" placeholder="예: 0.9">
-      </div>
+    <div class="actions">
+      <button type="button" class="btn" id="copyBtn">결과 복사</button>
+      <button type="button" class="btn ghost" id="printBtn">인쇄 / PDF</button>
     </div>
-    <div class="field" id="ceilingField" style="display: none;">
-      <label for="ceilingInput">바닥 ~ 천장 높이 (<span class="unit-label">m</span>, 선택)</label>
-      <input type="number" id="ceilingInput" min="0" step="any" placeholder="예: 3.0">
-    </div>
-    <div class="info-box mb"><span>렌즈 중심 높이 가능 범위 (바닥 기준)</span><strong id="hLensRange">-</strong></div>
-    <div class="info-box mb" id="hCeilingBox" style="display: none;"><span>천장 ~ 렌즈 중심 거리</span><strong id="hCeilingRange">-</strong></div>
-    <div class="info-box mb"><span>스크린 중심 높이 (바닥 기준)</span><strong id="hScreenCenter">-</strong></div>
-    <div class="info-box" id="hUstBox" hidden><span>초단초점 b, c (사양서 그림 기준: b = 프로젝터 기준점 ~ 스크린 가까운 쪽 끝, c = 먼 쪽 끝)</span><strong id="hUst" class="small">-</strong></div>
-    <ul class="note">
-      <li>렌즈 중심 기준입니다. 본체 외형·천장 브래킷 높이는 포함하지 않습니다.</li>
-      <li>수평 시프트를 0 으로 둔 경우의 범위입니다. 수평 시프트를 쓰면 수직 범위가 줄어듭니다.</li>
-      <li>계산 방식은 엡손 사양서의 "렌즈 중심 ~ 스크린 하단 거리" 공식과 같습니다.</li>
-    </ul>
-
-    <p class="sub-title">계획 위치 확인 (시프트 / 기울기 / 키스톤)</p>
-    <div class="grid-2">
-      <div class="field">
-        <label for="planLensY">렌즈 중심 높이 (<span class="unit-label">m</span>)</label>
-        <input type="number" id="planLensY" step="any" placeholder="바닥 기준">
-      </div>
-      <div class="field">
-        <label for="planLensX">좌우 위치 (<span class="unit-label">m</span>)</label>
-        <input type="number" id="planLensX" step="any" value="0" placeholder="스크린 중심 기준, 오른쪽 +">
-      </div>
-    </div>
-    <div class="field">
-      <label for="planDist">투사거리 (<span class="unit-label">m</span>, 비우면 WIDE~TELE 중간)</label>
-      <input type="number" id="planDist" min="0" step="any">
-    </div>
-    <div class="info-box mb"><span>수직</span><strong id="placeV" class="small">-</strong></div>
-    <div class="info-box"><span>수평</span><strong id="placeH" class="small">-</strong></div>
-    <ul class="note">
-      <li>시프트 범위를 넘는 만큼은 프로젝터를 기울여야 합니다. 기울기는 atan(넘는 거리 ÷ 투사거리)로 근사합니다.</li>
-      <li>키스톤 보정 가능 범위는 엡손 사양서 표 기준입니다. 키스톤을 쓰면 영상이 작아지고 화질이 떨어집니다.</li>
-    </ul>
-  </div>
-
-  <div class="card">
-    <div class="card-title">6. 설치 그림</div>
-    <p class="note" id="diagramMsg"></p>
-    <div id="diagramBox">
-      <p class="diagram-label">측면도 (오른쪽이 스크린)</p>
-      <div class="diagram" id="sideView"></div>
-      <p class="diagram-label">정면도 (스크린을 바라본 모습)</p>
-      <div class="diagram" id="frontView"></div>
-    </div>
-    <ul class="note">
-      <li>빨간 영역은 렌즈 중심이 위치할 수 있는 범위입니다. 상하·좌우를 동시에 최대로 쓸 수 없으므로 실제 범위는 사각형보다 좁습니다.</li>
-      <li>점선은 패널 전체 영상(검은 여백 포함)입니다. 바닥 높이를 입력하지 않으면 스크린 하단을 기준으로 그립니다.</li>
-    </ul>
-  </div>
-
-  <div class="card">
-    <div class="card-title">7. 같은 조건으로 설치 가능한 기종</div>
-    <div class="field">
-      <label for="matchDistInput">설치할 투사거리 (<span class="unit-label">m</span>)</label>
-      <input type="number" id="matchDistInput" min="0" step="any" placeholder="예: 6">
-    </div>
-    <p class="note" id="matchMsg">현재 스크린 크기에서, 입력한 거리가 렌즈의 WIDE ~ TELE 범위 안에 드는 기종과 렌즈를 보여줍니다.</p>
-    <ul class="match-list" id="matchList"></ul>
-  </div>
-
-  <div class="card">
-    <div class="card-title">8. 엣지 블렌딩 (여러 대 이어붙이기)</div>
-    <div class="grid-3">
-      <div class="field">
-        <label for="blendCols">가로 대수</label>
-        <input type="number" id="blendCols" value="2" min="1" step="1">
-      </div>
-      <div class="field">
-        <label for="blendRows">세로 대수</label>
-        <input type="number" id="blendRows" value="1" min="1" step="1">
-      </div>
-      <div class="field">
-        <label for="blendOverlap">블렌드 폭 (%)</label>
-        <input type="number" id="blendOverlap" value="15" min="0" max="90" step="1">
-      </div>
-    </div>
-    <div class="grid-2 mb">
-      <div class="info-box"><span>1대당 영상 크기</span><strong id="blendPanel">-</strong></div>
-      <div class="info-box"><span>블렌드 폭 (가로 / 세로)</span><strong id="blendWidth">-</strong></div>
-    </div>
-    <div class="grid-2">
-      <div class="info-box"><span>1대당 투사거리</span><strong id="blendDist">-</strong></div>
-      <div class="info-box"><span>전체 영상 (검은 여백 포함)</span><strong id="blendCanvas">-</strong></div>
-    </div>
-    <ul class="note">
-      <li>현재 선택한 기종·렌즈와 2번에서 입력한 스크린 크기로 계산합니다. 블렌드 폭은 한 대 영상 대비 % 입니다.</li>
-      <li>기종별 블렌드 폭 설정 가능 범위는 해당 매뉴얼을 확인하세요.</li>
-    </ul>
-  </div>
-
-  <div class="card">
-    <div class="card-title">9. 밝기·대비 판정</div>
-    <div class="grid-3">
-      <div class="field">
-        <label for="lumenInput">밝기 (lm)</label>
-        <input type="number" id="lumenInput" min="0" step="100">
-      </div>
-      <div class="field">
-        <label for="gainInput">스크린 게인</label>
-        <input type="number" id="gainInput" value="1.0" min="0" step="0.1">
-      </div>
-      <div class="field">
-        <label for="ambientInput">주변광 (lux)</label>
-        <input type="number" id="ambientInput" min="0" step="10" placeholder="스크린 면 측정값">
-      </div>
-    </div>
-    <p class="note" id="lumenSource"></p>
-    <div class="grid-2 mb">
-      <div class="info-box"><span>스크린 조도 / 휘도</span><strong id="briLux">-</strong></div>
-      <div class="info-box"><span>대비 (근사, 상한값)</span><strong id="briContrast">-</strong></div>
-    </div>
-    <div class="info-box"><span>판정 (ANSI/INFOCOMM 3M-2011 기준)</span><strong id="briLevel">-</strong></div>
-    <ul class="note">
-      <li>기준: 수동적 시청 7:1, 기본 의사결정 15:1, 분석적 의사결정 50:1, 풀모션 영상 80:1. 표준 원문은 확인하지 못했고 2차 자료 기준입니다.</li>
-      <li>프로젝터의 검은색 밝기를 무시하므로 실제 대비보다 높게 나옵니다. 광원 모드·사용 시간에 따라 실제 밝기는 낮아집니다.</li>
-    </ul>
-  </div>
-
-  <div class="card">
-    <button type="button" class="copy-btn" id="copyBtn">결과 복사</button>
-    <button type="button" class="copy-btn secondary" id="printBtn">인쇄 / PDF 저장</button>
     <p class="note" id="copyStatus"></p>
-    <p class="note">인쇄 / PDF 저장은 파일(index.html)로 열었을 때만 동작합니다. 링크(아티팩트)에서는 동작하지 않습니다.</p>
-  </div>
+  </section>
 
+  <!-- 펼쳐 보는 기능 -->
+  <details class="card fold">
+    <summary>설치 높이 · 계획 위치</summary>
+    <div class="fold-body">
+      <div class="row-2">
+        <div class="field">
+          <label for="mountSelect">설치 방식</label>
+          <select id="mountSelect">
+            <option value="FLOOR">바닥/테이블</option>
+            <option value="CEILING">천장(반전)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="screenBottomInput">바닥~화면 하단 (<span class="unit-label">m</span>)</label>
+          <input type="number" id="screenBottomInput" min="0" step="any" placeholder="예: 0.9" inputmode="decimal">
+        </div>
+      </div>
+      <div class="field" id="ceilingField" style="display: none;">
+        <label for="ceilingInput">바닥~천장 (<span class="unit-label">m</span>, 선택)</label>
+        <input type="number" id="ceilingInput" min="0" step="any" placeholder="예: 3.0" inputmode="decimal">
+      </div>
+      <dl class="facts">
+        <div class="wide"><dt>렌즈 중심 높이 (바닥 기준)</dt><dd id="hLensRange">-</dd></div>
+        <div id="hCeilingBox" style="display: none;"><dt>천장~렌즈 중심</dt><dd id="hCeilingRange">-</dd></div>
+        <div><dt>화면 중심 높이</dt><dd id="hScreenCenter">-</dd></div>
+        <div class="wide" id="hUstBox" hidden><dt>초단초점 b / c (사양서 그림 기준)</dt><dd id="hUst">-</dd></div>
+      </dl>
+
+      <p class="sub-title">계획 위치 확인 (시프트 · 기울기 · 키스톤)</p>
+      <div class="row-3">
+        <div class="field">
+          <label for="planLensY">렌즈 높이</label>
+          <input type="number" id="planLensY" step="any" placeholder="바닥 기준" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label for="planLensX">좌우 (+오른쪽)</label>
+          <input type="number" id="planLensX" step="any" value="0" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label for="planDist">거리 (비우면 중간값)</label>
+          <input type="number" id="planDist" min="0" step="any" placeholder="자동" inputmode="decimal">
+        </div>
+      </div>
+      <p class="note">단위: <span class="unit-label">m</span></p>
+      <dl class="facts">
+        <div class="wide"><dt>수직</dt><dd id="placeV">-</dd></div>
+        <div class="wide"><dt>수평</dt><dd id="placeH">-</dd></div>
+      </dl>
+      <ul class="note">
+        <li>렌즈 중심 기준입니다. 본체 외형·브래킷 높이는 포함하지 않습니다.</li>
+        <li>수평 시프트를 쓰면 수직 범위가 줄어듭니다. 범위를 넘으면 기울기 = atan(넘는 거리 ÷ 거리)로 근사하고, 사양서의 키스톤 범위와 비교합니다.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="card fold">
+    <summary>설치 그림</summary>
+    <div class="fold-body">
+      <p class="note" id="diagramMsg"></p>
+      <div id="diagramBox">
+        <p class="diagram-label">측면도 (오른쪽이 화면)</p>
+        <div class="diagram" id="sideView"></div>
+        <p class="diagram-label">정면도 (화면을 바라본 모습)</p>
+        <div class="diagram" id="frontView"></div>
+      </div>
+      <p class="note">빨간 영역은 렌즈 중심이 놓일 수 있는 범위입니다. 상하·좌우를 동시에 최대로 쓸 수 없어 실제로는 더 좁습니다.</p>
+    </div>
+  </details>
+
+  <details class="card fold">
+    <summary>같은 조건으로 설치 가능한 기종</summary>
+    <div class="fold-body">
+      <div class="field">
+        <label for="matchDistInput">설치할 투사거리 (<span class="unit-label">m</span>)</label>
+        <input type="number" id="matchDistInput" min="0" step="any" placeholder="예: 6" inputmode="decimal">
+      </div>
+      <p class="note" id="matchMsg"></p>
+      <ul class="match-list" id="matchList"></ul>
+    </div>
+  </details>
+
+  <details class="card fold">
+    <summary>엣지 블렌딩</summary>
+    <div class="fold-body">
+      <div class="row-3">
+        <div class="field">
+          <label for="blendCols">가로 대수</label>
+          <input type="number" id="blendCols" value="2" min="1" step="1" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="blendRows">세로 대수</label>
+          <input type="number" id="blendRows" value="1" min="1" step="1" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="blendOverlap">블렌드 폭 %</label>
+          <input type="number" id="blendOverlap" value="15" min="0" max="90" step="1" inputmode="numeric">
+        </div>
+      </div>
+      <dl class="facts">
+        <div><dt>1대당 영상</dt><dd id="blendPanel">-</dd></div>
+        <div><dt>블렌드 폭 (가로/세로)</dt><dd id="blendWidth">-</dd></div>
+        <div><dt>1대당 거리</dt><dd id="blendDist">-</dd></div>
+        <div class="wide"><dt>전체 영상</dt><dd id="blendCanvas">-</dd></div>
+      </dl>
+      <p class="note">현재 기종·렌즈와 위에서 입력한 화면 크기로 계산합니다. 블렌드 폭 설정 가능 범위는 기종 매뉴얼을 확인하세요.</p>
+    </div>
+  </details>
+
+  <details class="card fold">
+    <summary>밝기 · 대비 판정</summary>
+    <div class="fold-body">
+      <div class="row-3">
+        <div class="field">
+          <label for="lumenInput">밝기 (lm)</label>
+          <input type="number" id="lumenInput" min="0" step="100" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="gainInput">스크린 게인</label>
+          <input type="number" id="gainInput" value="1.0" min="0" step="0.1" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label for="ambientInput">주변광 (lux)</label>
+          <input type="number" id="ambientInput" min="0" step="10" placeholder="화면 면" inputmode="numeric">
+        </div>
+      </div>
+      <p class="note" id="lumenSource"></p>
+      <dl class="facts">
+        <div><dt>화면 조도 / 휘도</dt><dd id="briLux">-</dd></div>
+        <div><dt>대비 (상한값)</dt><dd id="briContrast">-</dd></div>
+        <div class="wide"><dt>판정 (ANSI/INFOCOMM 3M-2011)</dt><dd id="briLevel">-</dd></div>
+      </dl>
+      <p class="note">기준 7:1 수동적 시청 · 15:1 기본 의사결정 · 50:1 분석적 의사결정 · 80:1 풀모션 영상 (2차 자료 기준). 프로젝터의 검은색 밝기를 무시해 실제보다 높게 나옵니다.</p>
+    </div>
+  </details>
+
+  <details class="card fold">
+    <summary>장비 제원 · 자료 출처</summary>
+    <div class="fold-body">
+      <dl class="facts">
+        <div><dt>밝기 (Normal)</dt><dd id="specLumens">-</dd></div>
+        <div><dt>해상도 / 패널</dt><dd id="specRes">-</dd></div>
+        <div><dt>무게</dt><dd id="specWeight">-</dd></div>
+        <div><dt>렌즈 방식</dt><dd id="specLensType">-</dd></div>
+        <div class="wide"><dt>렌즈 / 투사비 / 시프트</dt><dd id="specOptics">-</dd></div>
+        <div class="wide"><dt>렌즈 장착 시 밝기</dt><dd id="specLight">-</dd></div>
+      </dl>
+      <p class="source" id="specSource"></p>
+      <ul class="note">
+        <li>거리 = 엡손 사양서 공식 (a × 패널 영상 대각선 인치 + b). 화면 비율이 패널과 다르면 사양서와 같은 방식(가로 또는 세로 맞춤)으로 계산합니다.</li>
+        <li>계산값은 근사치입니다. 실제 설치 전 해당 기종 매뉴얼로 확인하세요. 인쇄 / PDF 는 파일(index.html)로 열었을 때만 동작합니다.</li>
+      </ul>
+    </div>
+  </details>
+
+</main>
+
+  <script src="js/theme.js"></script>
   <script src="js/data/lenses.js"></script>
   <script src="js/data/projectors.js"></script>
   <script src="js/data/light_output.js"></script>
