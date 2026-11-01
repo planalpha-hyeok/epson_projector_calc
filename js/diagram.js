@@ -65,11 +65,18 @@
     if (d.ceiling) yVals.push(d.ceiling);
     const yMin = Math.min(...yVals);
     const yMax = Math.max(...yVals);
-    const S = makeScale(0, d.distTele * 1.05, yMin, yMax, true);
+    // 뒷벽(방 깊이)이 있으면 그림 범위에 포함
+    const xEnd = Math.max(d.distTele * 1.05, d.depth ? d.depth * 1.03 : 0);
+    const S = makeScale(0, xEnd, yMin, yMax, true);
 
     let b = '';
-    if (d.hasFloor) b += line(S.X(d.distTele * 1.05), S.Y(0), S.X(0), S.Y(0), C.line, 1.5) + text(S.X(d.distTele * 1.05), S.Y(0) + FONT + 2, '바닥');
-    if (d.ceiling) b += line(S.X(d.distTele * 1.05), S.Y(d.ceiling), S.X(0), S.Y(d.ceiling), C.line, 1.5) + text(S.X(d.distTele * 1.05), S.Y(d.ceiling) - 4, '천장');
+    if (d.hasFloor) b += line(S.X(xEnd), S.Y(0), S.X(0), S.Y(0), C.line, 1.5) + text(S.X(xEnd), S.Y(0) + FONT + 2, '바닥');
+    // 천장 글자는 렌즈 높이 숫자와 겹치지 않도록 가운데에 표시
+    if (d.ceiling) b += line(S.X(xEnd), S.Y(d.ceiling), S.X(0), S.Y(d.ceiling), C.line, 1.5) + text((S.X(xEnd) + S.X(0)) / 2, S.Y(d.ceiling) - 4, '천장', 'middle');
+
+    if (d.depth) {
+      b += line(S.X(d.depth), S.Y(yMax), S.X(d.depth), S.Y(yMin), C.line, 1.5, '6 3') + text(S.X(d.depth) + 4, S.Y(yMax) + FONT, '뒷벽', 'start');
+    }
 
     // 빔: WIDE 위치, 렌즈 범위 중앙에서 패널 상하단으로
     const bx = S.X(d.distWide);
@@ -125,11 +132,21 @@
     const yVals = [center - d.panelH / 2, center + d.panelH / 2];
     if (hasLensY) yVals.push(d.lensYMin, d.lensYMax);
     if (d.hasFloor) yVals.push(0);
-    const xHalf = Math.max(d.panelW / 2, Math.abs(xr[0]), Math.abs(xr[1])) * 1.05;
-    const S = makeScale(-xHalf, xHalf, Math.min(...yVals), Math.max(...yVals), false);
+    if (d.ceiling) yVals.push(d.ceiling);
+    const walls = d.wallLeft !== null && d.wallLeft !== undefined;
+    const xHalf = Math.max(d.panelW / 2, Math.abs(xr[0]), Math.abs(xr[1]),
+      walls ? Math.max(Math.abs(d.wallLeft), Math.abs(d.wallRight)) : 0) * 1.05;
+    const yLo = Math.min(...yVals);
+    const yHi = Math.max(...yVals);
+    const S = makeScale(-xHalf, xHalf, yLo, yHi, false);
 
     let b = '';
     if (d.hasFloor) b += line(S.X(-xHalf), S.Y(0), S.X(xHalf), S.Y(0), C.line, 1.5) + text(S.X(-xHalf), S.Y(0) + FONT + 2, '바닥');
+    if (d.ceiling) b += line(S.X(-xHalf), S.Y(d.ceiling), S.X(xHalf), S.Y(d.ceiling), C.line, 1.5) + text(S.X(-xHalf), S.Y(d.ceiling) - 4, '천장');
+    if (walls) {
+      b += line(S.X(d.wallLeft), S.Y(yHi), S.X(d.wallLeft), S.Y(yLo), C.line, 1.5, '6 3');
+      b += line(S.X(d.wallRight), S.Y(yHi), S.X(d.wallRight), S.Y(yLo), C.line, 1.5, '6 3');
+    }
     b += rect(S.X(-d.panelW / 2), S.Y(center + d.panelH / 2), S.X(d.panelW / 2), S.Y(center - d.panelH / 2), C.panel, 'none', '4 3');
     b += rect(S.X(-d.screenW / 2), S.Y(d.screenBottom + d.screenH), S.X(d.screenW / 2), S.Y(d.screenBottom), C.screen, null);
 
@@ -148,7 +165,55 @@
     return svg('정면도', b);
   }
 
-  const api = { sideView, frontView };
+  /**
+   * 평면도 (위에서 본 모습). 오른쪽이 화면, 위쪽이 화면을 바라볼 때의 왼쪽.
+   * @param {object} d
+   *   screenW, panelW, distWide, distTele (mm)
+   *   lensXMin, lensXMax (mm, 화면 중심 기준 오른쪽 +) 또는 null
+   *   wallLeft, wallRight (mm, 화면 중심 기준) 또는 null, depth (mm) 또는 null, unit
+   */
+  function topView(d) {
+    const f = (mm) => U.format(mm, d.unit);
+    const walls = d.wallLeft !== null && d.wallLeft !== undefined;
+    const hasLensX = d.lensXMin !== null && d.lensXMin !== undefined;
+    // 그림 좌표: y = -좌우위치 (오른쪽이 아래로 가도록)
+    const lat = [d.panelW / 2, -d.panelW / 2];
+    if (hasLensX) lat.push(d.lensXMin, d.lensXMax);
+    if (walls) lat.push(d.wallLeft, d.wallRight);
+    const yMin = -Math.max(...lat);
+    const yMax = -Math.min(...lat);
+    const pad = (yMax - yMin) * 0.06;
+    const xEnd = Math.max(d.distTele * 1.05, d.depth ? d.depth * 1.03 : 0);
+    const S = makeScale(0, xEnd, yMin - pad, yMax + pad, true);
+    const Y = (lateral) => S.Y(-lateral);
+
+    let b = '';
+    if (walls) {
+      b += line(S.X(xEnd), Y(d.wallLeft), S.X(0), Y(d.wallLeft), C.line, 1.5) + text(S.X(xEnd), Y(d.wallLeft) - 4, '왼쪽 벽');
+      b += line(S.X(xEnd), Y(d.wallRight), S.X(0), Y(d.wallRight), C.line, 1.5) + text(S.X(xEnd), Y(d.wallRight) + FONT + 2, '오른쪽 벽');
+    }
+    if (d.depth) {
+      const top = walls ? Y(d.wallLeft) : S.Y(yMax + pad);
+      const bot = walls ? Y(d.wallRight) : S.Y(yMin - pad);
+      b += line(S.X(d.depth), top, S.X(d.depth), bot, C.line, 1.5, '6 3') + text(S.X(d.depth) + 4, top + FONT + 2, '뒷벽', 'start');
+    }
+    // 빔: WIDE 위치, 렌즈 좌우 범위 중앙에서 패널 좌우 끝으로
+    const lx = hasLensX ? (d.lensXMin + d.lensXMax) / 2 : 0;
+    b += line(S.X(d.distWide), Y(lx), S.X(0), Y(-d.panelW / 2), C.beam, 1, '4 3') + line(S.X(d.distWide), Y(lx), S.X(0), Y(d.panelW / 2), C.beam, 1, '4 3');
+    b += line(S.X(0), Y(-d.panelW / 2), S.X(0), Y(d.panelW / 2), C.panel, 2, '3 3');
+    b += line(S.X(0), Y(-d.screenW / 2), S.X(0), Y(d.screenW / 2), C.screen, 5);
+    b += text(S.X(0) - 6, Y(-d.screenW / 2) - 4, `화면 ${f(d.screenW)}`, 'end', C.screen);
+    // 렌즈 중심 가능 영역 (거리 WIDE~TELE × 좌우 시프트 범위)
+    const xT = S.X(d.distTele);
+    const xW = Math.abs(S.X(d.distWide) - xT) < 4 ? xT + 4 : S.X(d.distWide);
+    if (hasLensX && d.lensXMin !== d.lensXMax) b += rect(xT, Y(d.lensXMin), xW, Y(d.lensXMax), C.region, null);
+    else b += line(xT, Y(lx), xW, Y(lx), C.region, 3);
+    const dy = H - 10;
+    b += text((S.X(d.distWide) + S.X(d.distTele)) / 2, dy, `거리 ${f(d.distWide)} ~ ${f(d.distTele)}`, 'middle');
+    return svg('평면도', b);
+  }
+
+  const api = { sideView, frontView, topView };
   root.EPC = root.EPC || {};
   root.EPC.diagram = api;
   if (typeof module !== 'undefined') module.exports = api;

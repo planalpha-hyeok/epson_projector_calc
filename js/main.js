@@ -2,12 +2,12 @@
  * 진입점: 상태 관리 + 이벤트 연결
  */
 (function (root) {
-  const { LENS_CLASSES, SERIES, PROJECTORS, LIGHT_OUTPUT, calc, catalog, install, match, diagram, units, report, ui, extras } = root.EPC;
+  const { LENS_CLASSES, SERIES, PROJECTORS, LIGHT_OUTPUT, calc, catalog, install, match, diagram, room, units, report, ui, extras } = root.EPC;
   const $ = ui.$;
 
   // 선택 단위로 입력받는 칸 (단위 변경 시 값을 환산해 유지)
   const LENGTH_INPUTS = ['customWidth', 'customHeight', 'distInput', 'screenBottomInput', 'ceilingInput', 'matchDistInput',
-    ...extras.LENGTH_INPUTS];
+    'roomWidth', 'roomDepth', 'screenFromLeft', ...extras.LENGTH_INPUTS];
   const MATCH_LIMIT = 60;
 
   const state = {
@@ -113,35 +113,63 @@
   }
 
   /** 설치 그림 (측면도/정면도) */
+  /**
+   * 설치 그림 (측면도/정면도/평면도) + 방 크기 간섭 확인
+   * @returns {string[]} 결과 복사에 덧붙일 줄
+   */
   function updateDiagrams(p, res, lens, inst) {
-    if (state.mode === 'DIST') { ui.renderDiagrams(null, null, '투사거리 입력 모드에서는 그리지 않습니다.'); return; }
-    if (!res) { ui.renderDiagrams(null, null, '화면 크기를 입력하세요.'); return; }
-    if (p.type === 'FIXED' && !p.verified) {
-      ui.renderDiagrams(null, null, '공식 자료로 확인하지 않은 고정 렌즈 기종은 그리지 않습니다.');
-      return;
-    }
-    if (lens.ust) {
-      ui.renderDiagrams(null, null, '초단초점은 그림 대신 5번 카드의 b, c 값을 사용하세요.');
-      return;
-    }
+    const stop = (msg) => { ui.renderDiagrams(null, null, msg); ui.renderRoomChecks([]); return []; };
+    if (state.mode === 'DIST') return stop('투사거리 입력 모드에서는 그리지 않습니다.');
+    if (!res) return stop('화면 크기를 입력하세요.');
+    if (p.type === 'FIXED' && !p.verified) return stop('공식 자료로 확인하지 않은 고정 렌즈 기종은 그리지 않습니다.');
+    if (lens.ust) return stop('초단초점은 그림 대신 "설치 높이" 칸의 b, c 값을 사용하세요.');
+
     const hasFloor = inst.screenBottomMm !== null;
     const bottom = hasFloor ? inst.screenBottomMm : 0;
     const v = lens.shift ? lens.shift.v : null;
     const h = lens.shift ? lens.shift.h : null;
     const range = install.lensHeightRange(bottom, res.screen.h, res.panel.h, v, inst.mount);
-    const ceiling = inst.mount === 'CEILING' && inst.ceilingMm > 0 && hasFloor ? inst.ceilingMm : null;
+    const ceiling = inst.ceilingMm > 0 && hasFloor ? inst.ceilingMm : null;
+
+    // 방 크기 (선택). 좌우 위치는 화면 중심 기준, 왼쪽이 음수
+    const roomW = readLengthMm('roomWidth');
+    const depth = readLengthMm('roomDepth') || null;
+    const fromLeft = readLengthMm('screenFromLeft');
+    let wallLeft = null;
+    let wallRight = null;
+    if (roomW > 0) {
+      wallLeft = -(fromLeft !== null ? fromLeft : roomW / 2);
+      wallRight = roomW + wallLeft;
+    }
+    // 렌즈 좌우 가능 범위 (수평 시프트). 영상 중심 = 렌즈 + s × 패널 가로
+    const lensX = h ? [-h[1] / 100 * res.panel.w, -h[0] / 100 * res.panel.w] : null;
+    const distWide = res.distWide * 1000;
+    const distTele = res.distTele * 1000;
+
     const side = diagram.sideView({
-      screenBottom: bottom, screenH: res.screen.h, panelH: res.panel.h,
-      distWide: res.distWide * 1000, distTele: res.distTele * 1000,
+      screenBottom: bottom, screenH: res.screen.h, panelH: res.panel.h, distWide, distTele,
       lensMin: range ? range.min : null, lensMax: range ? range.max : null,
-      ceiling, hasFloor, unit: state.unit
+      ceiling, hasFloor, depth, unit: state.unit
     });
     const front = diagram.frontView({
       screenBottom: bottom, screenW: res.screen.w, screenH: res.screen.h, panelW: res.panel.w, panelH: res.panel.h,
       lensYMin: range ? range.min : null, lensYMax: range ? range.max : null,
-      hRangePct: h, hasFloor, unit: state.unit
+      hRangePct: h, hasFloor, ceiling, wallLeft, wallRight, unit: state.unit
     });
-    ui.renderDiagrams(side, front, v ? '' : '수직 시프트 자료가 없어 렌즈 높이 범위는 표시하지 않습니다.');
+    const top = diagram.topView({
+      screenW: res.screen.w, panelW: res.panel.w, distWide, distTele,
+      lensXMin: lensX ? lensX[0] : null, lensXMax: lensX ? lensX[1] : null,
+      wallLeft, wallRight, depth, unit: state.unit
+    });
+    ui.renderDiagrams(side, front, v ? '' : '수직 시프트 자료가 없어 렌즈 높이 범위는 표시하지 않습니다.', top);
+
+    const checks = room.check({
+      hasFloor, screenBottom: bottom, screenW: res.screen.w, screenH: res.screen.h, panelW: res.panel.w, panelH: res.panel.h,
+      ceiling, wallLeft, wallRight, depth, distWide, distTele,
+      lensMin: range ? range.min : null, lensMax: range ? range.max : null
+    }, (mm) => units.format(mm, state.unit));
+    ui.renderRoomChecks(checks);
+    return checks.length ? ['공간 확인:', ...checks.map((c) => `  ${c.state === 'bad' ? '[불가]' : c.state === 'warn' ? '[주의]' : '[확인]'} ${c.text}`)] : [];
   }
 
   /** 같은 조건으로 설치 가능한 기종 */
@@ -173,6 +201,7 @@
     ui.renderUst(null, state.unit);
     ui.renderInstall(null, msg, $('mountSelect').value, null, state.unit);
     ui.renderDiagrams(null, null, '공식 자료가 없는 기종이라 그리지 않습니다.');
+    ui.renderRoomChecks([]);
     ui.renderMatches([], '공식 자료가 없는 기종은 비교할 수 없습니다.', state.unit);
     extras.clear(msg);
     state.lastReport = '';
@@ -230,9 +259,9 @@
     const warnings = buildWarnings(p, lens, res);
     ui.renderWarnings(warnings);
     const inst = updateInstall(p, res, lens);
-    updateDiagrams(p, res, lens, inst);
+    const roomLines = updateDiagrams(p, res, lens, inst);
     if (state.mode === 'DIST') updateMatches(null);
-    const extraLines = extras.update({ p, lens, res, mode: state.mode, unit: state.unit, inst, light });
+    const extraLines = extras.update({ p, lens, res, mode: state.mode, unit: state.unit, inst, light }).concat(roomLines);
     state.lastReport = report.build(Object.assign(base, inst, { res, rev, distMm, warnings, extraLines }));
   }
 

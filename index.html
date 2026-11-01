@@ -155,8 +155,8 @@
           <input type="number" id="screenBottomInput" min="0" step="any" placeholder="예: 0.9" inputmode="decimal">
         </div>
       </div>
-      <div class="field" id="ceilingField" style="display: none;">
-        <label for="ceilingInput">바닥~천장 (<span class="unit-label">m</span>, 선택)</label>
+      <div class="field" id="ceilingField">
+        <label for="ceilingInput">바닥~천장 (<span class="unit-label">m</span>, 선택 · 천장 설치와 간섭 확인에 사용)</label>
         <input type="number" id="ceilingInput" min="0" step="any" placeholder="예: 3.0" inputmode="decimal">
       </div>
       <dl class="facts">
@@ -202,7 +202,26 @@
         <div class="diagram" id="sideView"></div>
         <p class="diagram-label">정면도 (화면을 바라본 모습)</p>
         <div class="diagram" id="frontView"></div>
+        <p class="diagram-label">평면도 (위에서 본 모습, 오른쪽이 화면)</p>
+        <div class="diagram" id="topView"></div>
       </div>
+      <p class="sub-title">방 크기 · 간섭 확인 (선택)</p>
+      <div class="row-3">
+        <div class="field">
+          <label for="roomWidth">방 가로 폭</label>
+          <input type="number" id="roomWidth" min="0" step="any" placeholder="벽~벽" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label for="roomDepth">방 깊이</label>
+          <input type="number" id="roomDepth" min="0" step="any" placeholder="화면~뒷벽" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label for="screenFromLeft">왼쪽 벽~화면 중심</label>
+          <input type="number" id="screenFromLeft" min="0" step="any" placeholder="비우면 가운데" inputmode="decimal">
+        </div>
+      </div>
+      <p class="note">단위: <span class="unit-label">m</span>. 천장 높이는 "설치 높이" 칸의 바닥~천장 값을 씁니다. 높이 확인은 바닥~화면 하단을 넣어야 합니다.</p>
+      <ul class="room-checks" id="roomChecks"></ul>
       <p class="note">빨간 영역은 렌즈 중심이 놓일 수 있는 범위입니다. 상하·좌우를 동시에 최대로 쓸 수 없어 실제로는 더 좁습니다.</p>
     </div>
   </details>
@@ -307,6 +326,7 @@
   <script src="js/install.js"></script>
   <script src="js/match.js"></script>
   <script src="js/diagram.js"></script>
+  <script src="js/room.js"></script>
   <script src="js/tilt.js"></script>
   <script src="js/blend.js"></script>
   <script src="js/brightness.js"></script>

@@ -153,6 +153,12 @@ ul.note { padding-left: 16px; display: grid; gap: 2px; }
 .match-list { list-style: none; display: grid; gap: 6px; }
 .match-list li { font-size: 0.8rem; padding: 9px 11px; background: var(--item); border-radius: 10px; }
 .match-list li .tag { font-size: 0.7rem; color: var(--warn); margin-left: 4px; }
+.room-checks { list-style: none; display: grid; gap: 6px; }
+.room-checks:empty { display: none; }
+.room-checks li { font-size: 0.82rem; font-weight: 700; padding: 9px 11px; border-radius: 10px; background: var(--item); }
+.room-checks li.state-ok { color: var(--ok); }
+.room-checks li.state-warn { color: var(--warn); background: var(--warn-bg); }
+.room-checks li.state-bad { color: var(--bad); background: rgba(255, 59, 48, 0.10); }
 .foot { text-align: center; font-size: 0.72rem; color: var(--muted); padding: 6px 0 4px; line-height: 1.6; }
 
 /* 설치 그림 (diagram.js 가 만드는 SVG 의 색) */

@@ -150,7 +150,6 @@
    * @param {string} msg     h 가 없을 때 표시할 문구
    */
   function renderInstall(h, msg, mount, ceilingMm, unit) {
-    $('ceilingField').style.display = mount === 'CEILING' ? '' : 'none';
     const showCeil = mount === 'CEILING' && h && ceilingMm > 0;
     $('hCeilingBox').style.display = showCeil ? 'block' : 'none';
     if (!h) {
@@ -205,11 +204,24 @@
   }
 
   /** 설치 그림. svg 문자열은 diagram.js 에서 생성 (사용자 입력 문자열은 이스케이프 처리됨) */
-  function renderDiagrams(sideSvg, frontSvg, msg) {
+  function renderDiagrams(sideSvg, frontSvg, msg, topSvg) {
     $('diagramMsg').textContent = msg || '';
     $('diagramBox').style.display = sideSvg ? 'block' : 'none';
     $('sideView').innerHTML = sideSvg || '';
     $('frontView').innerHTML = frontSvg || '';
+    $('topView').innerHTML = topSvg || '';
+  }
+
+  /** 공간 간섭 확인 결과 */
+  function renderRoomChecks(list) {
+    const ul = $('roomChecks');
+    ul.innerHTML = '';
+    (list || []).forEach((it) => {
+      const li = document.createElement('li');
+      li.className = `state-${it.state}`;
+      li.textContent = it.text;
+      ul.appendChild(li);
+    });
   }
 
   /** 같은 조건 가능 기종 목록 */
@@ -234,6 +246,6 @@
   root.EPC.ui = {
     $, renderSeries, renderProjectorList, renderLensList, renderSpecs,
     renderWarnings, renderResult, renderReverse, clearResult, renderInstall,
-    setUnitLabels, setMode, setCopyStatus, renderLight, renderDiagrams, renderMatches, renderUst, renderNoData
+    setUnitLabels, setMode, setCopyStatus, renderLight, renderDiagrams, renderMatches, renderUst, renderRoomChecks, renderNoData
   };
 })(window);
