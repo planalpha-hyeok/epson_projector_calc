@@ -73,7 +73,45 @@
     };
   }
 
-  const api = { parseAspect, screenFromDiagonal, diagonalInch, fitPanelToScreen, throwDistance, shiftRangeMm, calculate };
+  /** 패널 대각선(인치)과 패널 비율 → 패널 가로/세로(mm) */
+  function panelFromDiagonal(diagInch, nativeAspect) {
+    return screenFromDiagonal(diagInch, nativeAspect);
+  }
+
+  /** 패널 영상 → 그 안에 들어가는 스크린(콘텐츠) 크기 */
+  function screenInPanel(panel, nativeAspect, screenAspect) {
+    if (screenAspect >= nativeAspect) return { w: panel.w, h: panel.w / screenAspect };
+    return { w: panel.h * screenAspect, h: panel.h };
+  }
+
+  /**
+   * 역계산: 투사거리 → 가능한 스크린 크기
+   * WIDE 에서 가장 큰 화면, TELE 에서 가장 작은 화면.
+   * @returns {{wide:object, tele:object}|null}  각 {screen:{w,h,diagInch}, panel:{w,h,diagInch}}
+   */
+  function screenFromDistance(distM, nativeAspect, screenAspect, lens) {
+    if (!(distM > 0)) return null;
+    const native = parseAspect(nativeAspect);
+    const one = (pt) => {
+      const panelDiag = (distM * 100 - pt.b) / pt.a;
+      if (!(panelDiag > 0)) return null;
+      const panel = panelFromDiagonal(panelDiag, native);
+      const scr = screenInPanel(panel, native, screenAspect);
+      return {
+        panel: { w: panel.w, h: panel.h, diagInch: panelDiag },
+        screen: { w: scr.w, h: scr.h, diagInch: diagonalInch(scr.w, scr.h) }
+      };
+    };
+    const wide = one(lens.wide);
+    const tele = one(lens.tele);
+    if (!wide || !tele) return null;
+    return { wide, tele };
+  }
+
+  const api = {
+    parseAspect, screenFromDiagonal, diagonalInch, fitPanelToScreen, throwDistance, shiftRangeMm,
+    calculate, screenFromDistance
+  };
   root.EPC = root.EPC || {};
   root.EPC.calc = api;
   if (typeof module !== 'undefined') module.exports = api;

@@ -3,9 +3,8 @@
  */
 (function (root) {
   const $ = (id) => document.getElementById(id);
+  const U = root.EPC.units;
 
-  const fmtMm = (v) => `${Math.round(v).toLocaleString()} mm`;
-  const fmtM = (v) => `${v.toFixed(2)} m`;
   const fmtPct = (n) => (n > 0 ? `+${n}` : `${n}`);
 
   function fillSelect(select, items, getValue, getLabel) {
@@ -80,43 +79,93 @@
   }
 
   // 부호: 수직은 + 가 위, 수평은 + 가 오른쪽
-  function shiftMmText(rangeMm, rangePct) {
+  function shiftMmText(rangeMm, rangePct, unit) {
     if (!rangePct) return '자료 없음';
     if (rangePct[0] === 0 && rangePct[1] === 0) return '없음';
-    const [a, b] = rangeMm.map((v) => Math.round(v));
-    if (a === -b) return `±${b.toLocaleString()} mm (${shiftPctText(rangePct)})`;
-    return `${fmtPct(a)} ~ ${fmtPct(b)} mm (${shiftPctText(rangePct)})`;
+    const [a, b] = rangeMm;
+    if (Math.abs(a + b) < 0.5) return `±${U.format(b, unit)} (${shiftPctText(rangePct)})`;
+    const sg = (v) => (v > 0 ? '+' : '');
+    return `${sg(a)}${U.format(a, unit)} ~ ${sg(b)}${U.format(b, unit)} (${shiftPctText(rangePct)})`;
   }
 
-  function renderResult(res, lens) {
-    $('resDistMin').textContent = fmtM(res.distWide);
-    $('resDistMax').textContent = fmtM(res.distTele);
-    $('resWidth').textContent = fmtMm(res.screen.w);
-    $('resHeight').textContent = fmtMm(res.screen.h);
+  function sizeText(s, unit) {
+    return `${U.format(s.w, unit)} × ${U.format(s.h, unit)}`;
+  }
+
+  function renderResult(res, lens, unit) {
+    $('normalResult').style.display = 'block';
+    $('reverseResult').style.display = 'none';
+    $('resDistMin').textContent = U.format(res.distWide * 1000, unit);
+    $('resDistMax').textContent = U.format(res.distTele * 1000, unit);
+    $('resWidth').textContent = U.format(res.screen.w, unit);
+    $('resHeight').textContent = U.format(res.screen.h, unit);
     $('resDiagonal').textContent = `약 ${res.screen.diagInch.toFixed(1)} 인치`;
     $('resAspect').textContent = `${(res.screen.w / res.screen.h).toFixed(2)} : 1`;
-    $('resPanel').textContent =
-      `${fmtMm(res.panel.w)} × ${fmtMm(res.panel.h)} (${res.panel.fit === 'WIDTH' ? '가로 맞춤' : '세로 맞춤'})`;
+    $('resPanel').textContent = `${sizeText(res.panel, unit)} (${res.panel.fit === 'WIDTH' ? '가로 맞춤' : '세로 맞춤'})`;
     const shift = lens.shift || { v: null, h: null };
-    $('resVShift').textContent = shiftMmText(res.shiftV, shift.v);
-    $('resHShift').textContent = shiftMmText(res.shiftH, shift.h);
+    $('resVShift').textContent = shiftMmText(res.shiftV, shift.v, unit);
+    $('resHShift').textContent = shiftMmText(res.shiftH, shift.h, unit);
+  }
+
+  function renderReverse(rev, unit) {
+    $('normalResult').style.display = 'none';
+    $('reverseResult').style.display = 'block';
+    if (!rev) { clearResult(); return; }
+    $('revWideInch').textContent = `약 ${rev.wide.screen.diagInch.toFixed(1)} 인치`;
+    $('revTeleInch').textContent = `약 ${rev.tele.screen.diagInch.toFixed(1)} 인치`;
+    $('revWideSize').textContent = sizeText(rev.wide.screen, unit);
+    $('revTeleSize').textContent = sizeText(rev.tele.screen, unit);
   }
 
   function clearResult() {
-    ['resDistMin', 'resDistMax', 'resWidth', 'resHeight', 'resDiagonal', 'resAspect', 'resPanel', 'resVShift', 'resHShift']
+    ['resDistMin', 'resDistMax', 'resWidth', 'resHeight', 'resDiagonal', 'resAspect', 'resPanel', 'resVShift', 'resHShift',
+      'revWideInch', 'revTeleInch', 'revWideSize', 'revTeleSize']
       .forEach((id) => { $(id).textContent = '-'; });
+  }
+
+  /**
+   * 설치 높이 표시
+   * @param {object|null} h  install.lensHeightRange 결과
+   * @param {string} msg     h 가 없을 때 표시할 문구
+   */
+  function renderInstall(h, msg, mount, ceilingMm, unit) {
+    $('ceilingField').style.display = mount === 'CEILING' ? 'block' : 'none';
+    const showCeil = mount === 'CEILING' && h && ceilingMm > 0;
+    $('hCeilingBox').style.display = showCeil ? 'block' : 'none';
+    if (!h) {
+      $('hLensRange').textContent = msg;
+      $('hScreenCenter').textContent = '-';
+      return;
+    }
+    $('hLensRange').textContent = `${U.format(h.min, unit)} ~ ${U.format(h.max, unit)}`;
+    $('hScreenCenter').textContent = U.format(h.center, unit);
+    if (showCeil) {
+      $('hCeilingRange').textContent = `${U.format(ceilingMm - h.max, unit)} ~ ${U.format(ceilingMm - h.min, unit)}`;
+    }
+  }
+
+  function setUnitLabels(unit) {
+    document.querySelectorAll('.unit-label').forEach((el) => { el.textContent = U.LABEL[unit]; });
   }
 
   function setMode(mode) {
     $('tabInch').classList.toggle('active', mode === 'INCH');
     $('tabCustom').classList.toggle('active', mode === 'CUSTOM');
+    $('tabDist').classList.toggle('active', mode === 'DIST');
     $('inchInputSection').style.display = mode === 'INCH' ? 'block' : 'none';
     $('customInputSection').style.display = mode === 'CUSTOM' ? 'block' : 'none';
+    $('distInputSection').style.display = mode === 'DIST' ? 'block' : 'none';
+    $('ratioField').style.display = mode === 'CUSTOM' ? 'none' : 'block';
+  }
+
+  function setCopyStatus(text) {
+    $('copyStatus').textContent = text;
   }
 
   root.EPC = root.EPC || {};
   root.EPC.ui = {
     $, renderSeries, renderProjectorList, renderLensList, renderSpecs,
-    renderWarnings, renderResult, clearResult, setMode
+    renderWarnings, renderResult, renderReverse, clearResult, renderInstall,
+    setUnitLabels, setMode, setCopyStatus
   };
 })(window);

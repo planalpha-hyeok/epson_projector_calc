@@ -29,6 +29,8 @@
   const S104 = { v: [-58, 58], h: [-16, 16] };
   const S104_SMALL = { v: [-18, 18], h: null };
   const NOTE_SMALL = '사양서: 수평 시프트를 최대로 하면 수직 이동 0%';
+  const S103_UST = { v: [45, 70], h: null };
+  const NOTE_UST103 = '수직 범위는 사양서의 "렌즈 중심~스크린 하단" 공식(+0.27 / -0.07 ×인치)에서 환산';
 
   const LENS_CLASSES = {
     // 0.76" WUXGA/WXGA: PU1006~PU1008, L1050U~L1405U, G7000 시리즈
@@ -38,8 +40,8 @@
       source: '엡손 사양서: EB-PU2010 series Rev.06, EB-L1505U/L1405U series, EB-L1075U/L1070U series, EB-G7905U/G7900U series (16:10 공식 동일)',
       lenses: [
         { id: 'ELPLX01', name: 'ELPLX01 / X01S / X01W / X01WS 초단초점', trText: '0.35',
-          wide: f(0.79, -5.16), tele: f(0.79, -5.16), shift: null,
-          shiftNote: '사양서: 최대 이동 V×17%, 수평 최대 시 위로 이동 불가' },
+          wide: f(0.79, -5.16), tele: f(0.79, -5.16), shift: { v: [50, 67], h: null },
+          shiftNote: '수직 범위는 사양서의 "렌즈 중심~스크린 하단" 공식(0 ~ 0.24×인치)에서 환산. 사양서: 이동폭 V×17%, 수평 최대 시 위로 이동 불가' },
         { id: 'ELPLU03S', name: 'ELPLU03 / U03S 단초점 줌', trText: '0.65 - 0.78', wide: f(1.44, -3.77), tele: f(1.72, -3.63), shift: S076 },
         { id: 'ELPLU04', name: 'ELPLU04 / U02 단초점 줌', trText: '0.87 - 1.05', wide: f(1.94, -5.72), tele: f(2.33, -5.68), shift: S076 },
         { id: 'ELPLW05', name: 'ELPLW05 광각 줌', trText: '1.04 - 1.46', wide: f(2.32, -7.65), tele: f(3.21, -5.81), shift: S076 },
@@ -60,10 +62,10 @@
       basisAspect: '16:10',
       source: '엡손 사양서: EB-PU2220 series Rev.D, EB-PU2010 series Rev.06, EB-L1755U series r130, EB-L20000U series (16:10 공식 동일)',
       lenses: [
-        { id: 'ELPLX02', name: 'ELPLX02 / X02W 초단초점', trText: '0.35', wide: f(0.77, -3.40), tele: f(0.77, -3.40), shift: null,
-          onlyFor: [...PU2220, ...PU2010, ...L1755, ...L20000] },
-        { id: 'ELPLX02S', name: 'ELPLX02S / X02WS 초단초점', trText: '0.35', wide: f(0.77, -3.40), tele: f(0.77, -3.40), shift: null,
-          onlyFor: [...PU2220, ...PU2010] },
+        { id: 'ELPLX02', name: 'ELPLX02 / X02W 초단초점', trText: '0.35', wide: f(0.77, -3.40), tele: f(0.77, -3.40),
+          shift: S103_UST, shiftNote: NOTE_UST103, onlyFor: [...PU2220, ...PU2010, ...L1755, ...L20000] },
+        { id: 'ELPLX02S', name: 'ELPLX02S / X02WS 초단초점', trText: '0.35', wide: f(0.77, -3.40), tele: f(0.77, -3.40),
+          shift: S103_UST, shiftNote: NOTE_UST103, onlyFor: [...PU2220, ...PU2010] },
         { id: 'ELPLU03S', name: 'ELPLU03 / U03S 단초점 줌', trText: '0.48 - 0.57', wide: f(1.05, -3.49), tele: f(1.26, -3.28),
           shift: S103_SMALL, shiftNote: NOTE_SMALL, onlyFor: [...PU2220, ...PU2010, ...L1755] },
         { id: 'ELPLU04', name: 'ELPLU04 / U02 단초점 줌', trText: '0.64 - 0.77', wide: f(1.42, -5.65), tele: f(1.71, -5.52), shift: S103 },
@@ -88,7 +90,9 @@
       basisAspect: '16:9',
       source: '엡손 사양서: EB-PQ2220B/PQ2216/PQ2213B Rev.01, EB-PQ2010/PQ2008 Rev.03 (16:9 공식 동일). L12000Q 는 Pro L12000QNL 매뉴얼 투사거리 범위와 대조',
       lenses: [
-        { id: 'ELPLX02', name: 'ELPLX02 / X02W / X02S / X02WS 초단초점', trText: '0.34', wide: f(0.77, -3.41), tele: f(0.77, -3.41), shift: null },
+        { id: 'ELPLX02', name: 'ELPLX02 / X02W / X02S / X02WS 초단초점', trText: '0.34', wide: f(0.77, -3.41), tele: f(0.77, -3.41),
+          shift: { v: [45, 68], h: null },
+          shiftNote: '수직 범위는 사양서의 "렌즈 중심~스크린 하단" 공식(+0.22 / -0.06 ×인치)에서 환산' },
         { id: 'ELPLU03S', name: 'ELPLU03 / U03S 단초점 줌', trText: '0.46 - 0.56', wide: f(1.04, -3.47), tele: f(1.25, -3.28),
           shift: S104_SMALL, shiftNote: NOTE_SMALL },
         { id: 'ELPLU04', name: 'ELPLU04 단초점 줌', trText: '0.62 - 0.75', wide: f(1.40, -5.23), tele: f(1.69, -5.30), shift: S104 },
