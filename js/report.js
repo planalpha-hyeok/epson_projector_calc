@@ -26,6 +26,9 @@
     L.push(`렌즈: ${c.lens.name} (투사비 ${c.lens.trText}:1)`);
     const sh = c.lens.shift || {};
     L.push(`시프트: 상하 ${pct(sh.v)}, 좌우 ${pct(sh.h)}`);
+    if (c.light) {
+      L.push(`렌즈 장착 밝기: ${c.light.items.map((it) => `${it.model} ${it.lm.toLocaleString()} lm${it.limited ? '(자동 제한)' : ''}`).join(', ')}`);
+    }
 
     if (c.mode === 'DIST' && c.rev) {
       L.push(`투사거리: ${f(c.distMm)}`);

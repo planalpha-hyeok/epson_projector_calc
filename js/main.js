@@ -2,11 +2,12 @@
  * 진입점: 상태 관리 + 이벤트 연결
  */
 (function (root) {
-  const { LENS_CLASSES, SERIES, PROJECTORS, calc, install, units, report, ui } = root.EPC;
+  const { LENS_CLASSES, SERIES, PROJECTORS, LIGHT_OUTPUT, calc, catalog, install, match, diagram, units, report, ui } = root.EPC;
   const $ = ui.$;
 
   // 선택 단위로 입력받는 칸 (단위 변경 시 값을 환산해 유지)
-  const LENGTH_INPUTS = ['customWidth', 'customHeight', 'distInput', 'screenBottomInput', 'ceilingInput'];
+  const LENGTH_INPUTS = ['customWidth', 'customHeight', 'distInput', 'screenBottomInput', 'ceilingInput', 'matchDistInput'];
+  const MATCH_LIMIT = 60;
 
   const state = {
     mode: 'INCH',
@@ -19,14 +20,7 @@
     return PROJECTORS.find((p) => p.id === $('projectorSelect').value) || null;
   }
 
-  function lensesFor(p) {
-    if (p.type === 'FIXED') return [p.lens];
-    const cls = LENS_CLASSES[p.lensClass];
-    const hideShift = (cls.shiftUnknownFor || []).includes(p.id);
-    return cls.lenses
-      .filter((l) => !l.onlyFor || l.onlyFor.includes(p.id))
-      .map((l) => (hideShift ? Object.assign({}, l, { shift: null, shiftNote: '이 기종의 시프트 수치는 사양서로 확인하지 못함' }) : l));
-  }
+  const lensesFor = (p) => catalog.lensesFor(p, LENS_CLASSES);
 
   function currentLens(p) {
     const list = lensesFor(p);
@@ -110,6 +104,54 @@
     return ctx;
   }
 
+  /** 설치 그림 (측면도/정면도) */
+  function updateDiagrams(p, res, lens, inst) {
+    if (state.mode === 'DIST') { ui.renderDiagrams(null, null, '투사거리 입력 모드에서는 그리지 않습니다.'); return; }
+    if (!res) { ui.renderDiagrams(null, null, '화면 크기를 입력하세요.'); return; }
+    if (p.type === 'FIXED') {
+      ui.renderDiagrams(null, null, '고정 렌즈 기종은 렌즈 오프셋 자료가 없어 그리지 않습니다.');
+      return;
+    }
+    const hasFloor = inst.screenBottomMm !== null;
+    const bottom = hasFloor ? inst.screenBottomMm : 0;
+    const v = lens.shift ? lens.shift.v : null;
+    const h = lens.shift ? lens.shift.h : null;
+    const range = install.lensHeightRange(bottom, res.screen.h, res.panel.h, v, inst.mount);
+    const ceiling = inst.mount === 'CEILING' && inst.ceilingMm > 0 && hasFloor ? inst.ceilingMm : null;
+    const side = diagram.sideView({
+      screenBottom: bottom, screenH: res.screen.h, panelH: res.panel.h,
+      distWide: res.distWide * 1000, distTele: res.distTele * 1000,
+      lensMin: range ? range.min : null, lensMax: range ? range.max : null,
+      ceiling, hasFloor, unit: state.unit
+    });
+    const front = diagram.frontView({
+      screenBottom: bottom, screenW: res.screen.w, screenH: res.screen.h, panelW: res.panel.w, panelH: res.panel.h,
+      lensYMin: range ? range.min : null, lensYMax: range ? range.max : null,
+      hRangePct: h, hasFloor, unit: state.unit
+    });
+    ui.renderDiagrams(side, front, v ? '' : '수직 시프트 자료가 없어 렌즈 높이 범위는 표시하지 않습니다.');
+  }
+
+  /** 같은 조건으로 설치 가능한 기종 */
+  function updateMatches(screen) {
+    if (state.mode === 'DIST' || !screen) {
+      ui.renderMatches([], '대각선 인치 또는 가로/세로 입력 모드에서 사용할 수 있습니다.', state.unit);
+      return;
+    }
+    const distMm = readLengthMm('matchDistInput');
+    if (!(distMm > 0)) {
+      ui.renderMatches([], '현재 스크린 크기에서, 입력한 거리가 렌즈의 WIDE ~ TELE 범위 안에 드는 기종과 렌즈를 보여줍니다.', state.unit);
+      return;
+    }
+    const list = match.findMatches(screen, distMm / 1000, PROJECTORS, LENS_CLASSES)
+      .sort((a, b) => (b.p.verified - a.p.verified) || a.p.model.localeCompare(b.p.model));
+    const shown = list.slice(0, MATCH_LIMIT);
+    let msg = `${list.length}개 조합이 가능합니다.`;
+    if (list.length > MATCH_LIMIT) msg += ` 앞의 ${MATCH_LIMIT}개만 표시합니다.`;
+    if (!list.length) msg = '이 조건으로 설치 가능한 조합이 없습니다.';
+    ui.renderMatches(shown, msg, state.unit);
+  }
+
   function update() {
     const p = currentProjector();
     if (!p) { ui.clearResult(); ui.renderWarnings([]); state.lastReport = ''; return; }
@@ -118,7 +160,9 @@
     const cls = p.type === 'FIXED' ? null : LENS_CLASSES[p.lensClass];
     ui.renderSpecs(p, lens, cls);
 
-    const base = { p, lens, unit: state.unit, mode: state.mode };
+    const light = p.type === 'FIXED' ? null : catalog.lightOutputFor(p, lens, LIGHT_OUTPUT);
+    const base = { p, lens, unit: state.unit, mode: state.mode, light };
+    ui.renderLight(light);
     let res = null;
     let rev = null;
     let distMm = null;
@@ -131,6 +175,8 @@
         ui.renderReverse(null, state.unit);
         ui.renderWarnings(['[입력] 투사거리를 0보다 큰 숫자로 입력하세요. 너무 짧은 거리는 계산되지 않습니다.']);
         updateInstall(p, null, lens);
+        updateDiagrams(p, null, lens, null);
+        updateMatches(null);
         state.lastReport = '';
         return;
       }
@@ -141,16 +187,21 @@
         ui.clearResult();
         ui.renderWarnings(['[입력] 화면 크기를 0보다 큰 숫자로 입력하세요.']);
         updateInstall(p, null, lens);
+        updateDiagrams(p, null, lens, null);
+        updateMatches(null);
         state.lastReport = '';
         return;
       }
       res = calc.calculate(screen, p.nativeAspect, lens);
       ui.renderResult(res, lens, state.unit);
+      updateMatches(screen);
     }
 
     const warnings = buildWarnings(p, res);
     ui.renderWarnings(warnings);
     const inst = updateInstall(p, res, lens);
+    updateDiagrams(p, res, lens, inst);
+    if (state.mode === 'DIST') updateMatches(null);
     state.lastReport = report.build(Object.assign(base, inst, { res, rev, distMm, warnings }));
   }
 

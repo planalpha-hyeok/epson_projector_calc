@@ -162,10 +162,48 @@
     $('copyStatus').textContent = text;
   }
 
+  /** 렌즈 장착 시 밝기 */
+  function renderLight(light) {
+    if (!light) { $('specLight').textContent = '자료 없음 (이 기종의 사양서에 렌즈별 밝기 표가 없음)'; return; }
+    const parts = light.items.map((it) => {
+      let s = `${it.model} ${it.lm.toLocaleString()} lm`;
+      if (it.pct !== null && it.pct < 100) s += ` (${it.pct}%)`;
+      if (it.limited) s += ' *자동 밝기 제한';
+      return s;
+    });
+    $('specLight').textContent = `${parts.join(' / ')}  [${light.source}]`;
+  }
+
+  /** 설치 그림. svg 문자열은 diagram.js 에서 생성 (사용자 입력 문자열은 이스케이프 처리됨) */
+  function renderDiagrams(sideSvg, frontSvg, msg) {
+    $('diagramMsg').textContent = msg || '';
+    $('diagramBox').style.display = sideSvg ? 'block' : 'none';
+    $('sideView').innerHTML = sideSvg || '';
+    $('frontView').innerHTML = frontSvg || '';
+  }
+
+  /** 같은 조건 가능 기종 목록 */
+  function renderMatches(list, msg, unit) {
+    $('matchMsg').textContent = msg;
+    const ul = $('matchList');
+    ul.innerHTML = '';
+    (list || []).forEach((m) => {
+      const li = document.createElement('li');
+      li.textContent = `${m.p.model} + ${m.lens.name}  (${U.format(m.distWide * 1000, unit)} ~ ${U.format(m.distTele * 1000, unit)})`;
+      if (!m.p.verified) {
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = '미검증';
+        li.appendChild(tag);
+      }
+      ul.appendChild(li);
+    });
+  }
+
   root.EPC = root.EPC || {};
   root.EPC.ui = {
     $, renderSeries, renderProjectorList, renderLensList, renderSpecs,
     renderWarnings, renderResult, renderReverse, clearResult, renderInstall,
-    setUnitLabels, setMode, setCopyStatus
+    setUnitLabels, setMode, setCopyStatus, renderLight, renderDiagrams, renderMatches
   };
 })(window);
