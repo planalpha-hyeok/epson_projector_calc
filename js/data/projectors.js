@@ -17,7 +17,7 @@
     { id: 'PU_STD', label: '중대형 렌즈교체형 레이저 (EB-PU1000 / EB-L1000)' },
     { id: 'FLAGSHIP', label: '초고광속 (EB-L20000U / L25000U / L30000U / L12000Q)' },
     { id: 'G_SERIES', label: '설치형 G 시리즈 (EB-G7000)' },
-    { id: 'FIXED_LASER', label: '회의실/강의실 레이저 고정형 (EB-L700 / L600 / L500 / L400)' },
+    { id: 'FIXED_LASER', label: '회의실/강의실 레이저 고정형 (EB-L895U / L700 / L600 / L500 / L400)' },
     { id: 'SMALL_LASER', label: '소형 레이저 (EB-L260F / L210W / L200)' },
     { id: 'UST', label: '초단초점 (EB-810E / 800F / 770F / 735Fi / 1485Fi)' },
     { id: 'FIXED_LAMP', label: '램프형 (EB-2250U, EB-2065 등)' }
@@ -58,6 +58,7 @@
   // ---- 공식 사양서 값 ----
   const SRC_L735 = '엡손 사양서 EB-L735U/L730U/L635SU/L630SU/L630U/L530U/L520U series v1.04';
   const SRC_L770 = '엡손 사양서 EB-L775U/L770U/L570U';
+  const SRC_L890 = '엡손 사양서 EB-L890E/L895E/L890U/L895U/L790U/L690U Rev01';
   const SRC_L260 = '엡손 사양서 EB-L265F/L260F/L210W Rev01';
   const SRC_805 = '엡손 사양서 EB-805F/800F Rev02, EB-1485Fi (공식 동일)';
   const SRC_770 = '엡손 사양서 EB-775F/770Fi/770F/760Wi/760W Rev01';
@@ -71,6 +72,9 @@
     zoomNote: DIGITAL, source: SRC_L735 };
   const O_L520 = Object.assign({}, STD, { shift: { v: [46.4, 46.4], h: [0, 0] },
     shiftNote: '렌즈 시프트 없음. 수직 위치는 매뉴얼 표(500" 에서 렌즈 중심이 스크린 하단보다 24 cm 위)에서 환산한 고정값', source: SRC_L735 });
+  // L895U 계열: 사양서 공식 2.96 x - 3.57 / 4.77 x - 3.51 (16:10), 시프트 상하 ±50% · 좌우 ±20%
+  // L890 사양서 공식(2.96x-3.57 / 4.77x-3.51)은 STD 를 반올림한 값. 사양서 투사거리 표는 STD 로 계산해야 일치 (300" 1429 cm)
+  const O_L890 = Object.assign({}, STD, { shift: { v: [-50, 50], h: [-20, 20] }, source: SRC_L890 });
   const O_L770 = Object.assign({}, STD, { shift: { v: [-50, 50], h: null },
     shiftNote: '수직 범위는 매뉴얼 투사거리 표(렌즈 중심~스크린 하단)에서 환산. 수평 시프트 수치는 사양서에서 확인하지 못함', source: SRC_L770 });
   const O_L260F = { wide: [2.9314, -2.8612], tele: [4.712, -2.9508], shift: { v: [49.7, 49.7], h: [0, 0] },
@@ -151,7 +155,10 @@
     fv('EB-L735U', 'EB-L735U', 'FIXED_LASER', '7,000 lm', 'WUXGA', '16:10', '약 8.4 kg', O_L735),
     fv('EB-L730U', 'EB-L730U', 'FIXED_LASER', '7,000 lm', 'WUXGA', '16:10', '약 8.4 kg', O_L735),
     fx('EB-L695U', 'EB-L695U', 'FIXED_LASER', '자료 없음', 'WUXGA', '16:10', '자료 없음'),
-    fx('EB-L690U', 'EB-L690U', 'FIXED_LASER', '자료 없음', 'WUXGA', '16:10', '자료 없음'),
+    fv('EB-L895U', 'EB-L895U', 'FIXED_LASER', '8,000 lm', 'WUXGA', '16:10', '약 8.5 kg', O_L890),
+    fv('EB-L890U', 'EB-L890U', 'FIXED_LASER', '8,000 lm', 'WUXGA', '16:10', '약 8.5 kg', O_L890),
+    fv('EB-L790U', 'EB-L790U', 'FIXED_LASER', '7,300 lm', 'WUXGA', '16:10', '약 8.2 kg', O_L890),
+    fv('EB-L690U', 'EB-L690U', 'FIXED_LASER', '6,500 lm', 'WUXGA', '16:10', '약 8.2 kg', O_L890),
     fv('EB-L635SU', 'EB-L635SU (단초점)', 'FIXED_LASER', '6,000 lm', 'WUXGA', '16:10', '약 8.4 kg', O_SU),
     fv('EB-L630SU', 'EB-L630SU (단초점)', 'FIXED_LASER', '6,000 lm', 'WUXGA', '16:10', '약 8.4 kg', O_SU),
     fv('EB-L630U', 'EB-L630U', 'FIXED_LASER', '6,200 lm', 'WUXGA', '16:10', '약 8.4 kg', O_L735),

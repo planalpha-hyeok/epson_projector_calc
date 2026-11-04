@@ -1,6 +1,6 @@
 // 오프라인 지원: 화면은 인터넷이 되면 항상 최신으로, 안 되면 저장본으로.
 // 파일을 바꾸면 CACHE 버전을 올린다 (이전 저장본 삭제용).
-const CACHE = 'epson-calc-v3';
+const CACHE = 'epson-calc-v4';
 const ASSETS = [
   './',
   './index.html',

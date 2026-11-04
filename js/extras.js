@@ -31,6 +31,7 @@
   function keystoneFor(p, lens) {
     const row = KEYSTONE[p.id];
     if (!row) return null;
+    if (lens.id === 'BUILTIN') return row.lenses.BUILTIN || null;
     const m = catalog.lensModels(lens).find((x) => row.lenses[x]);
     return m ? row.lenses[m] : null;
   }

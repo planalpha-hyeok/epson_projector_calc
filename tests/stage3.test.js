@@ -72,7 +72,7 @@ test('키스톤 데이터: 대상 본체의 모든 렌즈에 값이 있음', () 
     const p = PROJECTORS.find((x) => x.id === pid);
     assert.ok(p, `없는 본체 ${pid}`);
     catalog.lensesFor(p, LENS).forEach((l) => {
-      const m = catalog.lensModels(l).find((x) => row.lenses[x]);
+      const m = l.id === 'BUILTIN' ? 'BUILTIN' : catalog.lensModels(l).find((x) => row.lenses[x]);
       assert.ok(m, `${pid} ${l.name}: 키스톤 값 없음`);
       const [v, h] = row.lenses[m];
       assert.ok(v > 0 && v <= 45 && h > 0 && h <= 30, `${pid} ${m}`);
@@ -82,4 +82,5 @@ test('키스톤 데이터: 대상 본체의 모든 렌즈에 값이 있음', () 
   assert.deepStrictEqual(KEYSTONE['EB-PU2220B'].lenses.ELPLW08, [35, 30]);
   assert.deepStrictEqual(KEYSTONE['EB-PQ2010B'].lenses.ELPLU03S, [30, 30]);
   assert.deepStrictEqual(KEYSTONE['EB-PQ2220B'].lenses.ELPLU03S, [35, 30]);
+  assert.deepStrictEqual(KEYSTONE['EB-L895U'].lenses.BUILTIN, [30, 30]);
 });

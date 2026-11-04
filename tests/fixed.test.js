@@ -19,6 +19,9 @@ test('L735U 계열: 사양서 투사거리 표 (cm)', () => {
   // [본체, 인치, 비율, 최소, 최대]  출처: EB-L735U series v1.04 / EB-L770U 사양서 표
   [['EB-L735U', 100, '16:10', 292, 474], ['EB-L630U', 500, '16:10', 1476, 2384], ['EB-L520U', 120, '16:10', 351, 569],
    ['EB-L770U', 120, '4:3', 398, 645], ['EB-L570U', 300, '4:3', 1001, 1618],
+   // EB-L890E series Rev01 p.19~20
+   ['EB-L895U', 100, '16:10', 292, 474], ['EB-L890U', 300, '16:10', 884, 1429], ['EB-L790U', 100, '4:3', 331, 537],
+   ['EB-L690U', 300, '4:3', 1001, 1618], ['EB-L895U', 100, '16:9', 301, 487], ['EB-L895U', 300, '16:9', 909, 1469],
    ['EB-L635SU', 100, '16:9', 178, 240], ['EB-L630SU', 120, '16:9', 214, 289]].forEach(([id, i, r, mn, mx]) => {
     const d = dist(id, i, r);
     near(d.distWide * 100, mn, 1.5, `${id} ${i}" ${r} WIDE`);
@@ -76,10 +79,10 @@ test('고정 렌즈: 공식 확인 기종은 출처가 있고, 자료 없는 기
   const fixed = PROJECTORS.filter((p) => p.type === 'FIXED');
   fixed.filter((p) => p.verified).forEach((p) => assert.ok(p.source && /엡손 사양서/.test(p.source), p.id));
   const noData = fixed.filter((p) => !p.verified);
-  assert.strictEqual(fixed.length - noData.length, 22);
+  assert.strictEqual(fixed.length - noData.length, 26);
   // 공식 자료가 없는 기종은 광학 수치를 갖지 않음
   noData.forEach((p) => assert.ok(p.noData && p.lens === null, p.id));
-  assert.ok(noData.some((p) => p.id === 'EB-L690U') && noData.some((p) => p.id === 'EB-2250U'));
+  assert.ok(noData.some((p) => p.id === 'EB-L695U') && noData.some((p) => p.id === 'EB-2250U'));
 });
 
 test('밝기·무게: 사양서 값 또는 "자료 없음"', () => {

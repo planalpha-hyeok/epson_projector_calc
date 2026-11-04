@@ -69,6 +69,9 @@
   put(['EB-PQ2010B', 'EB-PQ2008B'], KPQ20, '엡손 사양서 EB-PQ2010 Rev.03');
   put(['EB-L30000U'], KL30, '엡손 사양서 EB-L30000U series v1.20');
 
+  // 고정 렌즈 (렌즈 항목 BUILTIN): EB-L890E/L895E/L890U/L895U/L790U/L690U 사양서 p.27
+  put(['EB-L895U', 'EB-L890U', 'EB-L790U', 'EB-L690U'], { BUILTIN: [30, 30] }, '엡손 사양서 EB-L890E/L895E series Rev01');
+
   root.EPC = root.EPC || {};
   root.EPC.KEYSTONE = BY_PROJECTOR;
   if (typeof module !== 'undefined') module.exports = BY_PROJECTOR;
